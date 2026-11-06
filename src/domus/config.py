@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     login_window_seconds: int = 300
     # Largest total uncompressed size a backup archive may expand to (zip-bomb guard).
     backup_max_bytes: int = 2 * 1024**3
+    # The sample home dataset that Admins can load from the web interface. Unset
+    # means examples/sample-home in a source checkout; the Docker image sets it.
+    sample_data_dir: Path | None = None
 
     @property
     def sqlite_path(self) -> Path:

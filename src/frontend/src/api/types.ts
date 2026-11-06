@@ -19,6 +19,7 @@ export interface Page<T> {
 export type CurrentUser = Schemas['MeOut'];
 export type Membership = Schemas['MembershipOut'];
 export type SetupStatus = Schemas['SetupStatus'];
+export type SampleDataStatus = Schemas['SampleDataStatus'];
 export type LoginInput = Schemas['LoginIn'];
 export type SetupInput = Schemas['SetupIn'];
 export type Property = Schemas['PropertyOut'];

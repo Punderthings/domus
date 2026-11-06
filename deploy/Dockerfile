@@ -59,6 +59,7 @@ COPY examples /opt/domus/examples
 
 ENV PATH="/opt/domus/venv/bin:${PATH}" \
     DOMUS_DATA_DIR=/data \
+    DOMUS_SAMPLE_DATA_DIR=/opt/domus/examples/sample-home \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 

@@ -2669,6 +2669,48 @@
         }
       }
     },
+    "/api/v1/sample-data": {
+      "get": {
+        "tags": [
+          "sample"
+        ],
+        "summary": "Sample Data Status",
+        "description": "Whether this install ships the sample home, and whether it is already loaded.",
+        "operationId": "sample_data_status_api_v1_sample_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDataStatus"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sample"
+        ],
+        "summary": "Load Sample Data",
+        "description": "Add the sample home as a new property, with the caller as its Admin.",
+        "operationId": "load_sample_data_api_v1_sample_data_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDataStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/calendar.ics": {
       "get": {
         "tags": [
@@ -6036,6 +6078,37 @@
         },
         "type": "object",
         "title": "PropertyUpdate"
+      },
+      "SampleDataStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "loaded": {
+            "type": "boolean",
+            "title": "Loaded"
+          },
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "available",
+          "loaded",
+          "property_id"
+        ],
+        "title": "SampleDataStatus",
+        "description": "Whether the sample home can be loaded from the web interface."
       },
       "SetupIn": {
         "properties": {

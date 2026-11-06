@@ -160,11 +160,29 @@ small fictional property: one house, two floors, four rooms, nine devices, five
 maintenance tasks (two already overdue), tags, and access rules. Use it to try Domus or
 to test changes by hand.
 
-### Into a blank instance, for manual testing
+There are two ways to load it. Both give you the same data.
 
-Load it **before** you create the first Admin. Setup then adds the new Admin to the
-Sample Home property instead of creating an empty one, so you sign in straight to a
-populated home.
+### From the web interface
+
+Sign in as an Admin. While your property has no rooms yet (as it is right after setup),
+the Overview shows **Try Domus with sample data**. Select **Load sample data**: Domus adds
+Sample Home as a second property, makes you its Admin, and switches to it. Your own
+property isn't changed. To switch between the two, open the account menu (the round
+button with your initial, top right) and pick a property.
+
+Sample Home can be loaded this way once per install. When it already has members, the
+card no longer appears and another Admin can't claim it.
+
+The web interface finds the dataset in `examples/sample-home/` of a source checkout,
+and in `/opt/domus/examples/sample-home` in the Docker image. An install without it,
+such as one installed from a wheel, doesn't show the card; set `DOMUS_SAMPLE_DATA_DIR`
+to a copy of the folder to enable it.
+
+### From the command line, into a blank instance
+
+For manual testing, you can also load it **before** you create the first Admin. Setup
+then adds the new Admin to Sample Home instead of creating an empty property, so you
+sign in straight to a populated home with no second property.
 
 With uv, from the repository root (the server can be stopped or never started):
 
@@ -184,7 +202,17 @@ docker compose -f deploy/compose.yaml start
 ```
 
 Then open Domus and create your account. Any property name works; it is ignored because
-a property already exists. You should see:
+a property already exists. The import reports two warnings, `ignoring unexpected file
+README.md` and `manifest lists no file hashes`. Both are expected for this dataset.
+
+Running the same command on an install that already has an Admin adds Sample Home with
+no members, because the import never touches accounts. An Admin can then claim it with
+**Load sample data** in the web interface.
+
+The import upserts by id: running it again changes nothing, and edits you made to sample
+records in the app are kept if they are newer.
+
+### What you should see
 
 - **Overview**: Sample Home at "123 Example Lane, Springfield", with the smoke detector
   test and the hose valve task listed as overdue, and House with Main Floor (Kitchen,
@@ -192,23 +220,8 @@ a property already exists. You should see:
 - **Devices**: nine devices, with the Gas Furnace marked **Critical** and the Wi-Fi,
   light, and console devices tagged `smart`.
 
-The import reports two warnings, `ignoring unexpected file README.md` and
-`manifest lists no file hashes`. Both are expected for this dataset.
-
 To start over, stop the server and delete the data folder (here `.domus-test`; for Docker,
 `docker compose -f deploy/compose.yaml down -v` deletes the volume and **all data in it**).
-
-### Into an install that already has an Admin
-
-Running the same `restore ... --merge` command later adds Sample Home as a second
-property. The import never touches accounts, so no one is a member of it yet, and your
-Admin doesn't see it. For manual testing, a blank instance as above is simpler.
-
-The import upserts by id: running it again changes nothing, and edits you made to sample
-records in the app are kept if they are newer.
-
-> **Coming in v0.1:** a "Load sample data" option in the web interface for a new
-> install, so Docker users don't need the command line for this.
 
 ## Connect Home Assistant (optional)
 
@@ -400,6 +413,7 @@ Domus reads settings from environment variables that start with `DOMUS_`.
 | `DOMUS_LOGIN_MAX_FAILURES` | `5` | Failed sign-ins allowed per window before Domus blocks more attempts |
 | `DOMUS_LOGIN_WINDOW_SECONDS` | `300` | Length of that window |
 | `DOMUS_BACKUP_MAX_BYTES` | `2147483648` (2 GiB) | Largest size a backup may expand to when verified or restored |
+| `DOMUS_SAMPLE_DATA_DIR` | `examples/sample-home` in a source checkout (`/opt/domus/examples/sample-home` in Docker) | The sample home that **Load sample data** imports |
 
 `domus serve` takes `--host` (default `127.0.0.1`) and `--port` (default `8000`). The
 Docker image listens on `0.0.0.0` inside the container, and the Compose file publishes it
