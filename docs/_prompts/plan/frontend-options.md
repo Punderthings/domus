@@ -118,7 +118,7 @@ Pick **B** if you value a lean, fast UI and are happy to assemble more widgets. 
 
 ## First front end steps (once an option is chosen)
 
-1. Scaffold the Vite app inside the monorepo (`frontend/`), with lint, format, Vitest, and Playwright, and add a license check in CI (`license-checker` or similar, failing on GPL, LGPL, or AGPL).
+1. Scaffold the Vite app inside the monorepo at `src/frontend/` (all source lives under `src/` per AGENTS.md; the build output goes to `src/domus/static/`), with lint, format, Vitest, and Playwright, and add a license check in CI (`license-checker` or similar, failing on GPL, LGPL, or AGPL).
 2. Generate the typed API client from FastAPI's `openapi.json` as a build step, and fail CI if it drifts.
 3. Build the app shell: layout, auth or login, a role-aware nav, dark mode, and bundled fonts.
 4. Build the inventory list and detail plus the "add appliance" flow, including camera upload.

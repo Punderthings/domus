@@ -27,3 +27,4 @@ Decisions made by Shane Curcuru during the initial planning session on 2026-11-0
 | 15 | Apple HomeKit | Add "Basic integration with Apple HomeKit" as a future version task, after the current set of tasks. |
 | 16 | Install guide | Add a comprehensive "How To Install Locally" guide as a v0.1 doc task, including how to make a backup and restore it, so maintainers can test between versions as we build. |
 | 17 | Example dataset | Add one simple example property with one home, a couple of rooms, and a handful of different devices, as a dataset that can be imported or added easily (`examples/sample-home/`). |
+| 18 | Source layout | All source code lives under `src/`, following PyPA packaging standards (AGENTS.md updated): `src/domus/` for the Python package and `src/frontend/` for the React app. |

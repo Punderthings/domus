@@ -252,8 +252,13 @@ Shared across all options:
 
 ```
 domus/
-  backend/   src/domus/{api,services,models,ha,backup,cli}, tests/, alembic/
-  frontend/  React + Mantine SPA (Vite, TypeScript strict)
+  pyproject.toml, uv.lock   one Python project at the repo root (PyPA src layout)
+  src/
+    domus/          Python package: api/, services/, models/, ha/, backup/, cli/,
+                    migrations/ (Alembic), static/ (built front end, git-ignored)
+    frontend/       React + Mantine SPA (Vite, TypeScript strict); its build
+                    output is copied into src/domus/static/ for the wheel and image
+  tests/            pytest tests for src/domus (outside src/, per PyPA)
   docs/      (MkDocs Material, MIT; docs/_prompts/ holds the human + AI design history)
   deploy/    Dockerfile, compose.yaml, Caddyfile example
   examples/  sample datasets (examples/sample-home/)
@@ -261,6 +266,7 @@ domus/
   LICENSE (Apache-2.0), NOTICE, CONTRIBUTING.md, SECURITY.md
 ```
 
+- All source code lives under `src/` (AGENTS.md, PyPA src layout): the importable Python package is `src/domus/`, and the front end source is `src/frontend/`. Alembic migrations live inside the package so they ship in the wheel.
 - Python 3.14+ everywhere, managed with uv (`requires-python = ">=3.14"`, ruff `target-version = "py314"`), PEP 8. Pre-commit with ruff (lint+format), mypy strict on backend, ESLint + Prettier + TypeScript strict on front end.
 - Tests: pytest with a fake HA WebSocket server fixture; Playwright (Apache-2.0) end-to-end for the five core workflows. Tests never use the network; every fetch is stubbed or mocked.
 - Conventional commits, semantic versioning, release images to GHCR.
