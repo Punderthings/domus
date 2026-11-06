@@ -47,8 +47,7 @@ say in the PR which way you read it.
 - **Use well-known vocabularies.** Prefer https://www.home-assistant.io/docs/organizing/
    or other standards like W3C Web Of Things, or Schema.org.
   Reuse a standard term before inventing one.
-- **Python tools:** Python 3.14+, managed with uv, PEP 8. Each tool lives in its own
-  folder under `assets/python/`, with a small public API, a CLI for common cases, a
+- **Python tools:** Python 3.14+, managed with uv, PEP 8. Source code lives under `/src` to follow PyPA directory standards, with a small public API, a CLI for common cases, a
   README, and pytest tests.  JavaScript uses well-maintained libraries and ESLint.
 - **Dependencies.** Every dependency, including build and test tools, must use a
   license on the ASF Category A list
