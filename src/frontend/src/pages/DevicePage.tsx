@@ -116,7 +116,7 @@ export function DevicePage() {
         </Card>
       </SimpleGrid>
 
-      {d.identifiers && d.identifiers.length > 0 && (
+      {'identifiers' in d && d.identifiers.length > 0 && (
         <Card withBorder>
           <Title order={3} mb="sm">
             Identifiers

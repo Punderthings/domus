@@ -43,8 +43,13 @@ Tests never use the network: `src/test/server.ts` replaces `fetch` with an in-me
 
 ## Notes
 
-- `src/api/types.ts` is hand-written to match the agreed API contract. Once the backend
-  publishes `openapi.json`, it will be generated from that instead.
+- API types are generated. `openapi.json` is a copy of the backend's OpenAPI document, and
+  `npm run api:types` turns it into `src/api/schema.d.ts` (openapi-typescript), which the
+  openapi-fetch client in `src/api/client.ts` uses. `src/api/types.ts` gives the schemas
+  friendly names. After changing the API, run `uv run python scripts/export_openapi.py` at
+  the repo root, then `npm run api:types`. CI fails if either file is out of date.
+- openapi-typescript 7.13 declares a TypeScript 5 peer; an npm `overrides` entry lets it use
+  the project's TypeScript 6, which it works with.
 - The UI hides what a role can't do, but the API enforces every rule. Guests get responses
   with sensitive fields removed, and pages show only the fields that are present.
 - Every dependency is ASF Category A except one build-only exception (decision 20): Vite 8

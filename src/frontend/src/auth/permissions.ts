@@ -10,6 +10,11 @@ export const ROLE_LABELS: Record<Role, string> = {
   guest: 'Guest',
 };
 
+/** Narrow the API's role string; anything unknown gets the least access. */
+export function toRole(value: string): Role {
+  return value in ROLE_RANK ? (value as Role) : 'guest';
+}
+
 /** True if `role` ranks at or above `minimum` (Admin > Maintainer > Resident > Guest). */
 export function hasRole(role: Role | undefined, minimum: Role): boolean {
   return role !== undefined && ROLE_RANK[role] >= ROLE_RANK[minimum];

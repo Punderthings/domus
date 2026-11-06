@@ -65,3 +65,10 @@ describe('safeHttpUrl', () => {
     expect(safeHttpUrl(null)).toBeNull();
   });
 });
+
+describe('browserTimeZone', () => {
+  it('returns an IANA zone name', async () => {
+    const { browserTimeZone } = await import('./format');
+    expect(browserTimeZone()).toMatch(/^[A-Za-z_]+(\/[A-Za-z_+-]+)*$/);
+  });
+});

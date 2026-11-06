@@ -1,6 +1,9 @@
-// Small fetch wrapper for /api/v1: JSON in and out, cookie session, CSRF header.
+// Typed client for /api/v1, generated from openapi.json (openapi-fetch), with the
+// cookie session, the CSRF header, and errors thrown as ApiError.
 
-export const API_BASE = '/api/v1';
+import createClient, { type Middleware } from 'openapi-fetch';
+import type { paths } from './schema';
+
 export const CSRF_COOKIE = 'domus_csrf';
 export const CSRF_HEADER = 'X-CSRF-Token';
 
@@ -28,51 +31,37 @@ export function readCookie(name: string, cookies: string = document.cookie): str
   return null;
 }
 
-export type QueryParams = Record<string, string | number | boolean | null | undefined>;
+const csrf: Middleware = {
+  onRequest({ request }) {
+    if (UNSAFE_METHODS.has(request.method)) {
+      const token = readCookie(CSRF_COOKIE);
+      if (token) request.headers.set(CSRF_HEADER, token);
+    }
+    return request;
+  },
+};
 
-/** Build an API URL, dropping empty parameters. */
-export function apiUrl(path: string, params?: QueryParams): string {
-  const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params ?? {})) {
-    if (value !== undefined && value !== null && value !== '') search.set(key, String(value));
-  }
-  const query = search.toString();
-  return `${API_BASE}${path}${query ? `?${query}` : ''}`;
+export const api = createClient<paths>({
+  // Same origin as the page: the backend serves both the app and the API.
+  baseUrl: globalThis.location?.origin ?? '',
+  credentials: 'same-origin',
+  headers: { Accept: 'application/json' },
+  // Look fetch up on each call, so tests can replace it.
+  fetch: (request) => globalThis.fetch(request),
+});
+api.use(csrf);
+
+function errorDetail(error: unknown): unknown {
+  return error && typeof error === 'object' && 'detail' in error
+    ? (error as { detail: unknown }).detail
+    : error;
 }
 
-export interface RequestOptions {
-  method?: string;
-  params?: QueryParams;
-  body?: unknown;
-  signal?: AbortSignal;
-}
-
-export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const method = (options.method ?? 'GET').toUpperCase();
-  const headers: Record<string, string> = { Accept: 'application/json' };
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  if (UNSAFE_METHODS.has(method)) {
-    const token = readCookie(CSRF_COOKIE);
-    if (token) headers[CSRF_HEADER] = token;
-  }
-
-  const response = await fetch(apiUrl(path, options.params), {
-    method,
-    headers,
-    credentials: 'same-origin',
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    signal: options.signal,
-  });
-
-  if (response.status === 204) return undefined as T;
-  const isJson = response.headers.get('Content-Type')?.includes('application/json') ?? false;
-  const payload: unknown = isJson ? await response.json() : await response.text();
-  if (!response.ok) {
-    const detail =
-      isJson && payload && typeof payload === 'object' && 'detail' in payload
-        ? (payload as { detail: unknown }).detail
-        : payload;
-    throw new ApiError(response.status, detail);
-  }
-  return payload as T;
+/** Return the data of an openapi-fetch result, or throw ApiError for an HTTP error. */
+export async function unwrap<T>(
+  result: Promise<{ data?: T; error?: unknown; response: Response }>,
+): Promise<T> {
+  const { data, error, response } = await result;
+  if (!response.ok) throw new ApiError(response.status, errorDetail(error));
+  return data as T;
 }

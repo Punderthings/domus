@@ -3,6 +3,7 @@ import { useForm } from '@mantine/form';
 import { Navigate, useNavigate } from '@tanstack/react-router';
 import { useSetup, useSetupStatus } from '../api/queries';
 import { PageLoader } from '../components/States';
+import { browserTimeZone } from '../format';
 import { AuthCard } from './AuthCard';
 
 export const MIN_PASSWORD_LENGTH = 12;
@@ -38,6 +39,7 @@ export function SetupPage() {
               email: values.email,
               password: values.password,
               property_name: values.property_name.trim(),
+              timezone: browserTimeZone(),
               display_name: values.display_name.trim(),
             },
             { onSuccess: () => void navigate({ to: '/' }) },
