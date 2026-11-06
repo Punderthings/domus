@@ -14,6 +14,16 @@ from domus.config import Settings
 API = "/api/v1"
 
 
+def pixels(data: bytes) -> tuple[tuple[int, int], Any]:
+    """Size and first pixel of an image: uploads are re-encoded, so bytes change."""
+    from io import BytesIO
+
+    from PIL import Image
+
+    with Image.open(BytesIO(data)) as img:
+        return img.size, img.convert("RGB").getpixel((0, 0))
+
+
 def ok(r: Any, code: int = 200) -> Any:
     assert r.status_code == code, r.text
     return r.json() if r.content else None
@@ -107,12 +117,12 @@ def test_upload_and_download_image(admin: Client, settings: Settings) -> None:
     data = png()
     doc = ok(upload(admin, data, kind="photo", filename="../x/wall.png", title="Wall"), 201)
     assert doc["mime_type"] == "image/png"
-    assert doc["size"] == len(data)
+    assert doc["size"] > 0
     assert doc["original_filename"] == "wall.png"
     assert doc["sensitivity"] == "resident"
     r = admin.get(doc["content_url"])
     assert r.status_code == 200
-    assert r.content == data
+    assert pixels(r.content) == pixels(data)
     assert r.header("content-type") == "image/png"
     assert r.header("x-content-type-options") == "nosniff"
     assert "sandbox" in (r.header("content-security-policy") or "")
@@ -134,6 +144,11 @@ def test_same_bytes_share_one_blob(admin: Client, settings: Settings) -> None:
     assert a["id"] != b["id"]
     blobs = [p for p in settings.blobs_dir.rglob("*") if p.is_file()]
     assert len(blobs) == 1
+
+
+def test_fake_image_is_refused(admin: Client) -> None:
+    r = upload(admin, b"\x89PNG\r\n\x1a\n" + b"junk" * 10)
+    assert r.status_code == 422
 
 
 @pytest.mark.parametrize(
@@ -197,7 +212,7 @@ def test_floor_plan_round_trip(admin: Client, home: dict[str, str], plan: dict[s
     assert plan["image_url"] == f"/api/v1/canvases/{plan['id']}/image?v={home['plan_doc']}"
     r = admin.get(plan["image_url"])
     assert r.status_code == 200
-    assert r.content == png(4, 3)
+    assert pixels(r.content) == pixels(png(4, 3))
     listed = ok(
         admin.get(f"{API}/canvases", params={"scope_type": "floor", "scope_id": home["floor"]})
     )
@@ -244,7 +259,7 @@ def test_replacing_the_image_keeps_pins(
     new_doc = ok(upload(admin, png(8, 6, (0, 0, 255)), kind="floor_plan"), 201)
     updated = ok(admin.patch(f"{API}/canvases/{plan['id']}", json={"document_id": new_doc["id"]}))
     assert updated["image_url"].endswith(new_doc["id"])
-    assert admin.get(updated["image_url"]).content == png(8, 6, (0, 0, 255))
+    assert pixels(admin.get(updated["image_url"]).content) == ((8, 6), (0, 0, 255))
     pins = ok(admin.get(f"{API}/canvases/{plan['id']}/placements"))["items"]
     assert [(q["id"], q["x"], q["y"]) for q in pins] == [(p["id"], 0.1, 0.2)]
     r = admin.patch(f"{API}/canvases/{plan['id']}", json={"document_id": None})
