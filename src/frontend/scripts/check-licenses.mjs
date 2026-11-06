@@ -33,7 +33,11 @@ export const ALLOWED = new Set([
  * lightningcss (MPL-2.0) and its per-platform binaries.
  */
 export const BUILD_ONLY_EXCEPTIONS = [
-  { name: /^lightningcss(-(android|darwin|freebsd|linux|win32)-[a-z0-9-]+)?$/, license: 'MPL-2.0' },
+  {
+    name: /^lightningcss(-(android|darwin|freebsd|linux|win32)-[a-z0-9-]+)?$/,
+    license: 'MPL-2.0',
+    reason: 'CSS transformer that Vite 8 requires at build time; never in the built app',
+  },
 ];
 
 function isBuildOnlyException(name, info) {
