@@ -13,7 +13,7 @@ Design principles:
 
 1. **Homeowner owns the data.** One portable database plus a files folder. Backup and restore never need HA or internet.
 2. **HA-native, not HA-dependent.** Reuse HA vocabulary (area, floor, device, entity, label) so mapping is 1:1, but every feature works standalone. Where HA has no term, reuse another standard vocabulary (W3C Web of Things, Schema.org) before inventing one (AGENTS.md).
-3. **Boring, permissive stack.** Apache-2.0 project. Every dependency, including build and test tools, must use a license on the [ASF Category A list](https://www.apache.org/legal/resolved.html#category-a) (for example Apache-2.0, MIT, BSD, ISC, PSF, PostgreSQL), and each PR names the license of any dependency it adds (AGENTS.md). Category B licenses such as MPL are not used. GPL, AGPL, and SSPL are never used. **LGPL is never used in the core application.** It is allowed only in optional, separately installed extras that a user explicitly enables, such as HEIC photo support via libheif (confirmed by Shane).
+3. **Boring, permissive stack.** Apache-2.0 project. Every dependency, including build and test tools, must use a license on the [ASF Category A list](https://www.apache.org/legal/resolved.html#category-a) (for example Apache-2.0, MIT, BSD, ISC, PSF, PostgreSQL), and each PR names the license of any dependency it adds (AGENTS.md). Category B licenses such as MPL are not used; if no permissive alternative exists, ask a maintainer and explain why the MPL dependency works better (Shane, decision 19). GPL, AGPL, and SSPL are never used. **LGPL is never used in the core application.** It is allowed only in optional, separately installed extras that a user explicitly enables, such as HEIC photo support via libheif (confirmed by Shane).
 4. **Runs anywhere.** One Docker image or a `uv`/`pip` install on a laptop, offline. Same image on any cloud host.
 5. **Read-only REST first.** Every core object exposed at `/api/v1` with OpenAPI docs.
 
@@ -208,7 +208,7 @@ All front end assets are bundled into the image. No runtime CDN calls, so it wor
 | QR labels | segno | BSD-3 |
 | Fuzzy match on import | rapidfuzz | MIT |
 | CLI | Typer | MIT |
-| Tests / lint / types | pytest, ruff, mypy | MIT |
+| Tests / lint / types | pytest, ruff, pyright (not mypy: it depends on pathspec, MPL-2.0) | MIT |
 | Search | SQLite FTS5 / Postgres full-text (built in) | Public domain / PostgreSQL |
 
 A CI step (`pip-licenses` MIT, and `license-checker` for the JS side) fails the build on any dependency that is not ASF Category A in the core install or the Docker image, including transitive ones. Optional extras such as `domus[heic]` (libheif, LGPL) live in a separate dependency group that is excluded from the core image and checked separately. They are off unless the user installs and enables them.
@@ -267,7 +267,7 @@ domus/
 ```
 
 - All source code lives under `src/` (AGENTS.md, PyPA src layout): the importable Python package is `src/domus/`, and the front end source is `src/frontend/`. Alembic migrations live inside the package so they ship in the wheel.
-- Python 3.14+ everywhere, managed with uv (`requires-python = ">=3.14"`, ruff `target-version = "py314"`), PEP 8. Pre-commit with ruff (lint+format), mypy strict on backend, ESLint + Prettier + TypeScript strict on front end.
+- Python 3.14+ everywhere, managed with uv (`requires-python = ">=3.14"`, ruff `target-version = "py314"`), PEP 8. Pre-commit with ruff (lint+format), pyright strict on backend, ESLint + Prettier + TypeScript strict on front end.
 - Tests: pytest with a fake HA WebSocket server fixture; Playwright (Apache-2.0) end-to-end for the five core workflows. Tests never use the network; every fetch is stubbed or mocked.
 - Conventional commits, semantic versioning, release images to GHCR.
 - Follow [AGENTS.md](../../../AGENTS.md) for all agent work: branch and PR only (never push to `main`), small diffs, a `Generated-by:` commit trailer for AI-assisted commits, and GitHub Actions pinned to full commit SHAs. Adding a dependency, tool, language, or GitHub Actions workflow, changing the published API, or making a backup-incompatible change needs a maintainer's OK first, so each step below that does one of these starts by asking.

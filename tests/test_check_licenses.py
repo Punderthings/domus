@@ -1,0 +1,93 @@
+"""Tests for scripts/check_licenses.py."""
+
+import importlib.util
+import io
+import json
+from pathlib import Path
+from types import ModuleType
+
+import pytest
+
+_SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "check_licenses.py"
+
+
+def _load() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("check_licenses", _SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+cl = _load()
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "MIT",
+        "MIT License",
+        "Apache-2.0",
+        "Apache Software License",
+        "BSD-3-Clause",
+        "PSF-2.0",
+        "Python Software Foundation License",
+        "Apache-2.0 OR BSD-2-Clause",
+        "MIT AND BSD-3-Clause",
+        "(MIT OR GPL-3.0-only)",
+        "GPL-3.0-only OR MIT",
+        "MIT License; Mozilla Public License 2.0 (MPL 2.0)",
+        "ISC License (ISCL)",
+        "zlib/libpng License",
+    ],
+)
+def test_allowed(text: str) -> None:
+    assert cl.is_allowed(text)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        "UNKNOWN",
+        "BSD License",
+        "LGPL-3.0-or-later",
+        "GNU Lesser General Public License v3 (LGPLv3)",
+        "GPL-2.0-only",
+        "AGPL-3.0-only",
+        "MPL-2.0",
+        "Mozilla Public License 2.0 (MPL 2.0)",
+        "MIT AND LGPL-2.1-only",
+        "Unlicense",
+        "Hippocratic-2.1",
+    ],
+)
+def test_rejected(text: str) -> None:
+    assert not cl.is_allowed(text)
+
+
+def test_find_violations_uses_overrides_and_skips_self() -> None:
+    packages = [
+        {"Name": "domus", "Version": "0.0.1", "License": "UNKNOWN"},
+        {"Name": "nodeenv", "Version": "1.0", "License": "BSD License"},
+        {"Name": "ok", "Version": "1.0", "License": "MIT"},
+        {"Name": "Bad", "Version": "2.0", "License": "LGPL-3.0-only"},
+        {"Name": "empty", "Version": "3.0", "License": ""},
+    ]
+    assert cl.find_violations(packages) == [
+        "Bad 2.0: LGPL-3.0-only",
+        "empty 3.0: no license metadata",
+    ]
+
+
+def test_main_exit_codes() -> None:
+    good = io.StringIO(json.dumps([{"Name": "a", "Version": "1", "License": "MIT"}]))
+    out = io.StringIO()
+    assert cl.main(good, out) == 0
+    assert "All 1 distributions" in out.getvalue()
+
+    bad = io.StringIO(json.dumps([{"Name": "b", "Version": "1", "License": "GPL-3.0-only"}]))
+    out = io.StringIO()
+    assert cl.main(bad, out) == 1
+    assert "b 1: GPL-3.0-only" in out.getvalue()

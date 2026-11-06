@@ -4,6 +4,8 @@ Holistic home helper: IOT inventory, mapping, control, and Home Assistant integr
 
 ## Status
 
-Domus is in the planning stage. The design work so far, including the original spec, the decisions made, and the master plan, is in [`docs/_prompts/`](docs/_prompts/README.md).
+Domus is in early development (v0.1). The design work so far, including the original spec, the decisions made, and the master plan, is in [`docs/_prompts/`](docs/_prompts/README.md).
 
 Licensed under the [Apache License 2.0](LICENSE).
+
+To set up a development environment and run the checks, see [CONTRIBUTING.md](CONTRIBUTING.md).

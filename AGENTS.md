@@ -40,7 +40,19 @@ say in the PR which way you read it.
 
 ## Repository map
 
-**TODO:** fill out as the project grows.
+| Path | What it holds |
+| :-- | :-- |
+| `pyproject.toml`, `uv.lock` | The one Python project (uv, PyPA src layout), tool config for ruff, pyright, pytest |
+| `src/domus/` | The Python package: backend, API, CLI |
+| `src/frontend/` | The React + Mantine single-page app |
+| `tests/` | pytest tests for `src/domus` and `scripts/` |
+| `scripts/` | Developer and CI helpers, such as `check_licenses.py` |
+| `docs/` | Documentation; `docs/_prompts/` holds the design history and plans |
+| `examples/` | Sample datasets, such as `examples/sample-home/` |
+| `.github/workflows/` | CI: lint, type check, tests, license check |
+
+Run the same checks CI runs with `uv run ruff check .`, `uv run ruff format --check .`,
+`uv run pyright`, and `uv run pytest` (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Coding Standards
 
