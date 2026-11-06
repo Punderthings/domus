@@ -27,6 +27,21 @@ uv run pip-licenses --from=mixed --format=json | uv run python scripts/check_lic
 
 Tests must not use the network; stub or mock every fetch.
 
+### Testing on PostgreSQL (experimental)
+
+SQLite is the default. To run the same suite against a local PostgreSQL 15+
+server, install the `postgres` extra (the pg8000 driver) and point
+`DOMUS_TEST_DATABASE_URL` at an account that may create databases. Each test
+creates its own database and drops it afterwards.
+
+```sh
+uv sync --extra postgres
+DOMUS_TEST_DATABASE_URL=postgresql+pg8000://domus:domus@localhost/domus uv run pytest
+```
+
+The search index needs the `pg_trgm` extension, which ships with PostgreSQL;
+migration 0002 creates it.
+
 ## Dependencies
 
 Every dependency, including build and test tools, must use a license on the

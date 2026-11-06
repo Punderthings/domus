@@ -26,6 +26,11 @@ dependencies = [
     "uvicorn>=0.30",
 ]
 
+[project.optional-dependencies]
+# Experimental PostgreSQL support (decision 2). pg8000 is pure Python and
+# BSD-3-Clause; 1.31.5 fixes CVE-2025-61385.
+postgres = ["pg8000>=1.31.5"]
+
 [project.scripts]
 domus = "domus.cli:main"
 

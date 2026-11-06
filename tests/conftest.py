@@ -1,11 +1,21 @@
-"""Shared fixtures. Tests never use the network (AGENTS.md)."""
+"""Shared fixtures. Tests never use the network (AGENTS.md).
 
+Set ``DOMUS_TEST_DATABASE_URL`` to a PostgreSQL URL (for example
+``postgresql+pg8000://domus:domus@localhost/domus``) to run the suite against
+Postgres instead of SQLite. Each test then gets a fresh database, created and
+dropped through that URL, so the account needs the CREATEDB privilege.
+"""
+
+import os
+import secrets
 from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
 from fastapi import FastAPI
-from sqlalchemy import Engine
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 from tests.asgi_client import Client
 
@@ -23,10 +33,51 @@ def sample_home() -> Path:
     return SAMPLE_HOME
 
 
+TEST_DATABASE_URL = os.environ.get("DOMUS_TEST_DATABASE_URL")
+
+
+def on_postgres() -> bool:
+    return bool(TEST_DATABASE_URL) and make_url(TEST_DATABASE_URL or "").get_backend_name() == (
+        "postgresql"
+    )
+
+
+requires_sqlite = pytest.mark.skipif(on_postgres(), reason="SQLite-only behavior")
+requires_postgres = pytest.mark.skipif(not on_postgres(), reason="needs DOMUS_TEST_DATABASE_URL")
+
+
+@contextmanager
+def postgres_database(url: str) -> Generator[str]:
+    """Create an empty database next to ``url``'s; yield its URL; drop it afterwards."""
+    base = make_url(url)
+    name = f"domus_test_{secrets.token_hex(6)}"
+    admin = create_engine(base, isolation_level="AUTOCOMMIT")
+    try:
+        with admin.connect() as conn:
+            conn.exec_driver_sql(f'CREATE DATABASE "{name}"')
+        try:
+            yield base.set(database=name).render_as_string(hide_password=False)
+        finally:
+            with admin.connect() as conn:
+                conn.exec_driver_sql(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)')
+    finally:
+        admin.dispose()
+
+
 @pytest.fixture
-def engine(tmp_path: Path) -> Generator[Engine]:
-    """A fresh, fully migrated SQLite database in a temp directory."""
-    eng = make_engine(f"sqlite:///{tmp_path / 'test.sqlite'}")
+def database_url(tmp_path: Path) -> Generator[str]:
+    """An empty database: SQLite in a temp directory, or a new Postgres database."""
+    if on_postgres():
+        with postgres_database(TEST_DATABASE_URL or "") as url:
+            yield url
+    else:
+        yield f"sqlite:///{tmp_path / 'test.sqlite'}"
+
+
+@pytest.fixture
+def engine(database_url: str) -> Generator[Engine]:
+    """A fresh, fully migrated database."""
+    eng = make_engine(database_url)
     upgrade(eng)
     yield eng
     eng.dispose()

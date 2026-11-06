@@ -10,10 +10,10 @@ one transaction; a dry run reports the counts and rolls back.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, Engine, Table, and_, insert, select, update
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError
 
 from domus.backup.codec import decode_row, loads_row
 from domus.backup.errors import ImportDataError
@@ -114,6 +114,32 @@ def _is_newer(incoming: object, stored: datetime | None) -> bool:
     return isinstance(incoming, datetime) and stored is not None and incoming > stored
 
 
+def _sqlstate(exc: DBAPIError) -> str | None:
+    """The SQLSTATE code from a pg8000 error (its first argument is a dict), else None."""
+    args: tuple[object, ...] = getattr(exc.orig, "args", ())
+    detail = args[0] if args else None
+    if isinstance(detail, dict):
+        code = cast(dict[str, object], detail).get("C")
+        return code if isinstance(code, str) else None
+    return None
+
+
+def _is_integrity_error(exc: DBAPIError) -> bool:
+    """SQLSTATE class 23 is "integrity constraint violation"."""
+    code = _sqlstate(exc)
+    return code is not None and code.startswith("23")
+
+
+def _db_message(exc: DBAPIError) -> str:
+    args: tuple[object, ...] = getattr(exc.orig, "args", ())
+    detail = args[0] if args else None
+    if isinstance(detail, dict):
+        message = cast(dict[str, object], detail).get("M")
+        if isinstance(message, str):
+            return message
+    return str(exc.orig)
+
+
 def _import_table(conn: Connection, table: Table, rows: list[dict[str, object]]) -> TableCounts:
     counts = TableCounts()
     pk_cols = list(table.primary_key.columns)
@@ -131,8 +157,11 @@ def _import_table(conn: Connection, table: Table, rows: list[dict[str, object]])
                 counts.updated += 1
             else:
                 counts.skipped += 1
-        except IntegrityError as exc:
-            raise ImportDataError(f"{table.name} row {key}: {exc.orig}") from exc
+        except (IntegrityError, ProgrammingError) as exc:
+            # pg8000 reports constraint violations as ProgrammingError.
+            if not isinstance(exc, IntegrityError) and not _is_integrity_error(exc):
+                raise
+            raise ImportDataError(f"{table.name} row {key}: {_db_message(exc)}") from exc
     return counts
 
 

@@ -31,6 +31,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Connection,
     Float,
@@ -361,8 +362,18 @@ def tsquery_text(terms: Sequence[str]) -> str:
     return " & ".join(f"{t}:*" for t in terms)
 
 
-# Below this pg_trgm similarity a title is not a near miss.
-TRIGRAM_THRESHOLD = 0.3
+# pg_trgm's own default for word similarity (pg_trgm.word_similarity_threshold).
+WORD_SIMILARITY_THRESHOLD = 0.6
+
+
+def normalize_for_postgres(value: str) -> str:
+    """Letters and digits only, split the way :func:`query_terms` splits queries.
+
+    The Postgres text parser reads "SN-77441" as the word "sn" and the
+    number "-77441", so a search for "77441" would miss it. Indexing the same
+    terms a query produces keeps both engines in step.
+    """
+    return " ".join(t.lower() for t in _TERM.findall(value))
 
 
 class PostgresSearchIndex:
@@ -374,6 +385,9 @@ class PostgresSearchIndex:
             stmt = stmt.where(_doc.c.ref_id.in_(ids))
         conn.execute(stmt)
         rows = _rows(_docs(conn, kind, ids))
+        for row in rows:
+            for key in ("title", "public_text", "private_text"):
+                row[key] = normalize_for_postgres(row[key])
         if rows:
             conn.execute(insert(_doc), rows)
 
@@ -392,14 +406,18 @@ class PostgresSearchIndex:
         tsv = _doc.c.all_tsv if include_private else _doc.c.public_tsv
         query = func.to_tsquery(text("'simple'"), tsquery_text(terms))
         phrase = " ".join(terms)
-        similarity: ColumnElement[Any] = func.similarity(_doc.c.title, phrase)
-        matched = tsv.op("@@")(query)
+        # Near misses ("hallwya") match on the title through pg_trgm's word
+        # similarity. The function form is used rather than the ``<%``
+        # operator, whose "%" the driver would read as a parameter marker.
+        similarity: ColumnElement[Any] = func.word_similarity(phrase, _doc.c.title)
+        near_miss = similarity >= WORD_SIMILARITY_THRESHOLD
+        matched = tsv.op("@@", return_type=Boolean)(query)
         rank = func.ts_rank(tsv, query) + similarity
         stmt = (
             select(_doc.c.kind, _doc.c.ref_id)
             .where(
                 _doc.c.property_id == property_id,
-                matched | (similarity >= TRIGRAM_THRESHOLD),
+                matched | near_miss,
             )
             .order_by(rank.desc(), _doc.c.ref_id)
             .limit(limit)

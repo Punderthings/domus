@@ -5,10 +5,10 @@ from typing import Any
 
 import pytest
 from fastapi import FastAPI
-from sqlalchemy import Engine, delete, inspect, text
+from sqlalchemy import Connection, Engine, delete, inspect, text
 from sqlalchemy.orm import Session
 from tests.asgi_client import Client
-from tests.conftest import member_client
+from tests.conftest import member_client, requires_postgres
 
 from domus.api.app import create_app
 from domus.backup import export_directory, import_source, open_source
@@ -26,6 +26,11 @@ API = "/api/v1"
 def ok(r: Any, code: int = 200) -> Any:
     assert r.status_code == code, r.text
     return r.json() if r.content else None
+
+
+def clear_index(conn: Connection) -> None:
+    table = "search_doc" if conn.dialect.name == "postgresql" else "search_fts"
+    conn.execute(text(f"DELETE FROM {table}"))  # noqa: S608 - fixed table names
 
 
 def find(c: Client, q: str, **params: Any) -> tuple[list[str], list[str]]:
@@ -326,7 +331,7 @@ def test_startup_fills_an_empty_index(
     engine: Engine, settings: Settings, admin: Client, home: dict[str, str]
 ) -> None:
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM search_fts"))
+        clear_index(conn)
         assert search.is_empty(conn)
     create_app(settings, engine)
     with engine.connect() as conn:
@@ -341,7 +346,7 @@ def test_import_rebuilds_the_index(
     export_directory(engine, out)
     # Wipe the index, then merge the same data back in: the import re-indexes.
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM search_fts"))
+        clear_index(conn)
     with open_source(out) as source:
         import_source(engine, source)
     assert find(admin, "ecobee")[0] == ["Hallway climate control"]
@@ -353,7 +358,7 @@ def test_dry_run_import_does_not_touch_the_index(
     out = tmp_path / "export"
     export_directory(engine, out)
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM search_fts"))
+        clear_index(conn)
     with open_source(out) as source:
         import_source(engine, source, dry_run=True)
     with engine.connect() as conn:
@@ -387,6 +392,12 @@ def test_migration_downgrade_and_upgrade(engine: Engine) -> None:
     with engine.begin() as conn:
         cfg.attributes["connection"] = conn
         command.downgrade(cfg, "0001")
-    assert "search_fts" not in inspect(engine).get_table_names()
+    table = "search_doc" if engine.dialect.name == "postgresql" else "search_fts"
+    assert table not in inspect(engine).get_table_names()
     upgrade(engine)
-    assert "search_fts" in inspect(engine).get_table_names()
+    assert table in inspect(engine).get_table_names()
+
+
+@requires_postgres
+def test_postgres_finds_near_misses_in_titles(admin: Client, home: dict[str, str]) -> None:
+    assert find(admin, "hallwya")[0] == ["Hallway climate control"]

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from sqlalchemy import Engine, inspect, text
+from tests.conftest import requires_sqlite
 
 from domus.db import make_engine
 from domus.migrate import current_revision, head_revision, upgrade
@@ -33,6 +34,7 @@ def test_migration_matches_models(engine: Engine) -> None:
     assert diff == []
 
 
+@requires_sqlite
 def test_sqlite_pragmas(engine: Engine) -> None:
     with engine.connect() as conn:
         assert conn.execute(text("PRAGMA foreign_keys")).scalar() == 1

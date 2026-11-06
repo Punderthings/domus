@@ -65,6 +65,7 @@ ALIASES: Mapping[str, str] = {
 # maintainer confirmed from the package's own LICENSE file.
 OVERRIDES: Mapping[str, str] = {
     "nodeenv": "BSD-3-Clause",  # classifier says only "BSD License"
+    "pg8000": "BSD-3-Clause",  # classifier says only "BSD License"; LICENSE file is BSD-3
 }
 
 # Build-time tools completely separate from application code may
