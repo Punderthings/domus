@@ -7,6 +7,11 @@ last section is a checklist for testing upgrades.
 It describes what is on `main` today (v0.1 in progress). Notes marked **Coming in v0.1**
 mark where features that are still being built will be documented.
 
+> **Before v0.3, upgrades may not keep your data.** The database schema and backup format
+> can still change between versions with no upgrade path, so a newer Domus may not open
+> an older data folder or restore an older backup. Treat v0.1 and v0.2 as trial versions
+> and don't rely on them for data you can't enter again.
+
 ## Contents
 
 1. [Prerequisites](#prerequisites)
