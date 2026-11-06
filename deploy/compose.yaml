@@ -1,0 +1,48 @@
+# Docker Compose example for Domus. From the repository root:
+#
+#   docker compose -f deploy/compose.yaml up -d --build
+#
+# Then open http://127.0.0.1:8000 and create the first Admin.
+# See docs/install-local.md for backups, restores, and upgrades.
+
+name: domus
+
+services:
+  domus:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: domus:local
+    restart: unless-stopped
+    ports:
+      # Only this computer can reach it. To reach Domus from other devices, put a
+      # reverse proxy with HTTPS in front (see the "https" profile below) rather
+      # than publishing this port on every interface.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - domus-data:/data
+    # environment:
+    #   # Plain http on a name other than localhost needs this, or the login
+    #   # cookie (marked Secure) is dropped by the browser. Prefer HTTPS instead.
+    #   DOMUS_COOKIE_SECURE: "false"
+
+  # Optional HTTPS front end: `docker compose -f deploy/compose.yaml --profile https up -d`.
+  # Caddy (Apache-2.0) issues a certificate from its own local CA for the name in
+  # DOMUS_HOSTNAME; browsers trust it once you install Caddy's root certificate.
+  caddy:
+    profiles: ["https"]
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - domus
+    ports:
+      - "443:443"
+    environment:
+      DOMUS_HOSTNAME: ${DOMUS_HOSTNAME:-domus.home.arpa}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+volumes:
+  domus-data:
+  caddy-data:
