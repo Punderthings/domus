@@ -155,7 +155,7 @@ curl http://127.0.0.1:8000/api/v1/health         # {"status":"ok","version":"...
 
 ## Load the sample home
 
-The sample home in [`examples/sample-home/`](../examples/sample-home/README.md) is a
+The sample home in [`examples/sample-home/`](https://github.com/punderthings/domus/tree/main/examples/sample-home) is a
 small fictional property: one house, two floors, four rooms, nine devices, five
 maintenance tasks (two already overdue), tags, and access rules. Use it to try Domus or
 to test changes by hand.
