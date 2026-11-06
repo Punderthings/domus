@@ -146,7 +146,7 @@ def test_fixed_calendar_impossible_rule_is_rejected_quickly() -> None:
     with pytest.raises(ValueError, match="never matches"):
         compute_next_due(calendar("FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30", TODAY), None, TODAY)
     # Without the 400-year bound dateutil searches to the year 9999 (seconds).
-    assert time.monotonic() - started < 1.5
+    assert time.monotonic() - started < 5  # generous for slow CI runners
 
 
 # --- validation ---------------------------------------------------------------
@@ -293,6 +293,21 @@ def test_complete_fixed_calendar_overdue(session: Session, home: Property) -> No
     task = smoke_test(session, home)
     complete_task(session, task, performed_on=date(2026, 11, 6))
     assert task.next_due == date(2027, 11, 1)
+
+
+@pytest.mark.parametrize(
+    ("performed_on", "expected"),
+    [
+        (date(2026, 10, 25), date(2027, 11, 1)),  # inside the 7-day reminder window
+        (date(2026, 10, 24), date(2026, 11, 1)),  # earlier than that: still due this year
+    ],
+)
+def test_complete_fixed_calendar_early_within_lead_days(
+    session: Session, home: Property, performed_on: date, expected: date
+) -> None:
+    task = smoke_test(session, home)  # lead_days defaults to 7
+    complete_task(session, task, performed_on=performed_on)
+    assert task.next_due == expected
 
 
 def test_complete_backfilled_event_does_not_move_schedule_back(

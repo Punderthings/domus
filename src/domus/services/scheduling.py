@@ -27,7 +27,7 @@ import math
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
@@ -306,6 +306,8 @@ def complete_task(
     - ``done`` and ``partial`` count as done: ``next_due`` is recomputed from
       the latest completion (``performed_on``, or a later one already on
       record, so back-filling an old event never moves the schedule back).
+      For a ``fixed_calendar`` task done early but within ``lead_days`` of its
+      due date, that occurrence counts as done.
     - ``skipped`` advances the schedule from the current ``next_due`` as if it
       had been done that day, without counting as done.
     - ``failed`` records the event and leaves ``next_due`` unchanged.
@@ -330,6 +332,15 @@ def complete_task(
     if outcome in ("done", "partial"):
         previous = _last_done_on(session, task.id)
         last_done = performed_on if previous is None else max(previous, performed_on)
+        due = task.next_due
+        if (
+            task.schedule_kind == "fixed_calendar"
+            and due is not None
+            and due - timedelta(days=max(task.lead_days, 0)) <= last_done < due
+        ):
+            # Done early, inside the reminder window: it covers this occurrence,
+            # so closing the hose valve on Oct 28 moves "every Nov 1" to next year.
+            last_done = due
         task.next_due = compute_next_due(task, last_done, performed_on)
     elif outcome == "skipped":
         current = task.next_due or compute_next_due(task, None, performed_on)
