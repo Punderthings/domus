@@ -12,9 +12,9 @@ A self-hosted web app for technical homeowners to inventory, locate, maintain, a
 Design principles:
 
 1. **Homeowner owns the data.** One portable database plus a files folder. Backup and restore never need HA or internet.
-2. **HA-native, not HA-dependent.** Reuse HA vocabulary (area, floor, device, entity, label) so mapping is 1:1, but every feature works standalone.
-3. **Boring, permissive stack.** Apache-2.0 project. Core dependencies are MIT/BSD/Apache/ISC/PSF/PostgreSQL only. GPL, AGPL, and SSPL are never used. **LGPL is never used in the core application.** It is allowed only in optional, separately installed extras that a user explicitly enables, such as HEIC photo support via libheif (confirmed by Shane).
-4. **Runs anywhere.** One Docker image or `pip install` on a laptop, offline. Same image on any cloud host.
+2. **HA-native, not HA-dependent.** Reuse HA vocabulary (area, floor, device, entity, label) so mapping is 1:1, but every feature works standalone. Where HA has no term, reuse another standard vocabulary (W3C Web of Things, Schema.org) before inventing one (AGENTS.md).
+3. **Boring, permissive stack.** Apache-2.0 project. Every dependency, including build and test tools, must use a license on the [ASF Category A list](https://www.apache.org/legal/resolved.html#category-a) (for example Apache-2.0, MIT, BSD, ISC, PSF, PostgreSQL), and each PR names the license of any dependency it adds (AGENTS.md). Category B licenses such as MPL are not used. GPL, AGPL, and SSPL are never used. **LGPL is never used in the core application.** It is allowed only in optional, separately installed extras that a user explicitly enables, such as HEIC photo support via libheif (confirmed by Shane).
+4. **Runs anywhere.** One Docker image or a `uv`/`pip` install on a laptop, offline. Same image on any cloud host.
 5. **Read-only REST first.** Every core object exposed at `/api/v1` with OpenAPI docs.
 
 ## 2. Users and roles
@@ -53,6 +53,8 @@ API tokens (personal access tokens) inherit the owner's role, with an optional r
 - Auth: local users with Admin/Maintainer/Resident/Guest.
 - Backup/restore: one-click archive (DB + files + manifest), scheduled backups, restore from UI or CLI.
 - Read-only REST API and iCal feed of upcoming maintenance.
+- Example dataset: a small sample property that can be imported in one step, for demos, tests, and trying the app (see section 10, step 11).
+- Docs: a comprehensive "How To Install Locally" guide, including how to make and restore a backup so maintainers can test upgrades between versions as we build (section 10, step 12).
 
 **v0.2**
 - Live HA context on asset page (state, last seen, IP/network, battery, power source) via WebSocket.
@@ -68,6 +70,9 @@ API tokens (personal access tokens) inherit the owner's role, with an optional r
 - Home Assistant custom integration (Python, HACS) exposing maintenance due dates as HA sensors/todo items and accepting "mark done" from HA.
 - Optional OIDC login (Authentik, Keycloak, HA as OAuth provider), multi-property.
 - Optional OCR of label photos to prefill model/serial (Tesseract, Apache-2.0).
+
+**Future (after v0.3)**
+- Basic integration with Apple HomeKit. The first approach to evaluate is going through Home Assistant's built-in HomeKit Bridge and HomeKit Device integrations, which need no new code in Domus. A direct option is HAP-python (Apache-2.0), to expose Domus maintenance status to the Home app without HA. Scope and approach to be decided when this is picked up.
 
 ## 4. System architecture
 
@@ -177,10 +182,11 @@ All front end assets are bundled into the image. No runtime CDN calls, so it wor
 
 ### 4.6 Backup and restore (summary; the final format is `.hiotbak`, see section 6)
 
-- Backup = one `.tar.gz` (or zip) containing a consistent DB snapshot (SQLite online backup API or `pg_dump`-free logical JSON export), the files directory, and a `manifest.json` (app version, schema version, checksums).
+- Backup = one `.hiotbak` zip containing a consistent DB snapshot, an engine-neutral JSONL export, the referenced files, and a `manifest.json` (app version, schema version, checksums).
 - Plus a **portable JSON export** of all records so data survives even if the app is abandoned.
 - Scheduled backups with retention; optional copy to a second path or S3 target.
 - Restore runs migrations forward if the backup is from an older schema version.
+- Any change that makes older backups incompatible with a new version needs a maintainer decision first, so maintainers can decide whether it needs a new major version (AGENTS.md).
 - CLI `domus backup|restore|export` works with the server stopped and without HA.
 
 ## 5. Candidate libraries and licenses (backend)
@@ -198,14 +204,14 @@ All front end assets are bundled into the image. No runtime CDN calls, so it wor
 | HTTP / WebSocket to HA | httpx, websockets | BSD-3 |
 | Password hashing | argon2-cffi | MIT |
 | Encryption | cryptography | Apache-2.0 / BSD |
-| Images | Pillow | MIT-CMU (HPND) |
+| Images | Pillow | MIT-CMU / HPND (the Python Imaging Library license, ASF Category A) |
 | QR labels | segno | BSD-3 |
 | Fuzzy match on import | rapidfuzz | MIT |
 | CLI | Typer | MIT |
 | Tests / lint / types | pytest, ruff, mypy | MIT |
 | Search | SQLite FTS5 / Postgres full-text (built in) | Public domain / PostgreSQL |
 
-A CI step (`pip-licenses` MIT, and `license-checker` for the JS side) fails the build on any GPL/LGPL/AGPL dependency in the core install or the Docker image, including transitive ones. Optional extras such as `domus[heic]` (libheif, LGPL) live in a separate dependency group that is excluded from the core image and checked separately. They are off unless the user installs and enables them.
+A CI step (`pip-licenses` MIT, and `license-checker` for the JS side) fails the build on any dependency that is not ASF Category A in the core install or the Docker image, including transitive ones. Optional extras such as `domus[heic]` (libheif, LGPL) live in a separate dependency group that is excluded from the core image and checked separately. They are off unless the user installs and enables them.
 
 ## 6. Database and storage
 
@@ -250,13 +256,15 @@ domus/
   frontend/  React + Mantine SPA (Vite, TypeScript strict)
   docs/      (MkDocs Material, MIT; docs/_prompts/ holds the human + AI design history)
   deploy/    Dockerfile, compose.yaml, Caddyfile example
+  examples/  sample datasets (examples/sample-home/)
   .github/   CI: lint, typecheck, test, license check, build image
   LICENSE (Apache-2.0), NOTICE, CONTRIBUTING.md, SECURITY.md
 ```
 
-- Python 3.14+ everywhere (`requires-python = ">=3.14"`, ruff `target-version = "py314"`). Pre-commit with ruff (lint+format), mypy strict on backend, ESLint + Prettier + TypeScript strict on front end.
-- Tests: pytest with a fake HA WebSocket server fixture; Playwright (Apache-2.0) end-to-end for the five core workflows.
+- Python 3.14+ everywhere, managed with uv (`requires-python = ">=3.14"`, ruff `target-version = "py314"`), PEP 8. Pre-commit with ruff (lint+format), mypy strict on backend, ESLint + Prettier + TypeScript strict on front end.
+- Tests: pytest with a fake HA WebSocket server fixture; Playwright (Apache-2.0) end-to-end for the five core workflows. Tests never use the network; every fetch is stubbed or mocked.
 - Conventional commits, semantic versioning, release images to GHCR.
+- Follow [AGENTS.md](../../../AGENTS.md) for all agent work: branch and PR only (never push to `main`), small diffs, a `Generated-by:` commit trailer for AI-assisted commits, and GitHub Actions pinned to full commit SHAs. Adding a dependency, tool, language, or GitHub Actions workflow, changing the published API, or making a backup-incompatible change needs a maintainer's OK first, so each step below that does one of these starts by asking.
 - DCO or simple CLA-free Apache-2.0 contributions.
 
 ## 9. Spec workflows mapped to features
@@ -272,7 +280,7 @@ domus/
 
 ## 10. First implementation steps (prioritized)
 
-1. **Repo bootstrap** in punderthings/domus: Apache-2.0 LICENSE/NOTICE, monorepo layout, pre-commit, CI with lint/type/test/license check.
+1. **Repo bootstrap** in punderthings/domus: NOTICE, monorepo layout, uv project, pre-commit, CI with lint/type/test/license check (new tools and workflows need a maintainer's OK per AGENTS.md), and the repository map in AGENTS.md.
 2. **Backend skeleton**: FastAPI app, settings, SQLAlchemy + Alembic, SQLite default, health endpoint, OpenAPI docs, Dockerfile.
 3. **Auth and roles**: first-run admin setup, login/logout session cookie, Admin/Maintainer/Resident/Guest dependency, critical-item and access-rule checks, personal access tokens, and the guest visibility filter with guest-safe response schemas. Tests prove a Guest cannot read hidden items or sensitive fields.
 4. **Data model + initial migration**: property, floor, area, location, product, asset, asset_identifier, asset_relation, tag, document, blob, attachment, maintenance_task, maintenance_event, user, membership, access_rule, audit_log, plus building and spatial_relation. Enable SQLite WAL, foreign keys, and busy timeout. CRUD and read-only list/get endpoints with tests.
@@ -282,7 +290,10 @@ domus/
 8. **Front end shell** (React + Mantine + TanStack Router/Query, Vite): app layout, login, inventory list/detail, asset form, due-maintenance dashboard.
 9. **Floor plan + wall photo pins**: upload plan image per floor, place/drag asset pins, hotspot pins on wall photos.
 10. **HA import**: connect screen, registry fetch, matcher, preview, idempotent apply; fake-HA test fixture.
-11. **v0.1 release**: Docker image, Compose example, docs site, seeded demo data.
+11. **Example dataset import**: make `examples/sample-home/` importable with `domus restore examples/sample-home --merge` (and a "Load sample data" button on an empty install), plus a test that imports it into a fresh database and checks row counts. The dataset is already in the repo: one property, one house, a few rooms, and a handful of different devices with maintenance tasks.
+12. **Docs: "How To Install Locally" guide** (`docs/install-local.md`): prerequisites; install with uv and with Docker; first run and admin setup; loading the sample data; connecting Home Assistant (optional); where data and backups live; **making a backup, restoring it, and verifying it**; and an "upgrade test" checklist so maintainers can back up on one version, upgrade or downgrade, restore, and compare as we build. Kept up to date with each release.
+13. **v0.1 release**: Docker image, Compose example, docs site.
+14. **Future, after v0.3: basic Apple HomeKit integration** (see section 3).
 
 Steps 2 to 7 can start immediately. Step 8 uses React + Mantine and follows the 9-step front end list in [frontend-options.md](frontend-options.md).
 

@@ -1,0 +1,30 @@
+{
+  "format_version": 1,
+  "app_version": null,
+  "schema_version": null,
+  "created_at": "2026-11-05T00:00:00Z",
+  "kind": "partial",
+  "property_ids": [
+    "01a1a901-5800-7001-8000-000000000001"
+  ],
+  "row_counts": {
+    "access_rule": 4,
+    "area": 4,
+    "asset": 9,
+    "asset_identifier": 8,
+    "asset_relation": 2,
+    "asset_tag": 5,
+    "building": 1,
+    "floor": 2,
+    "location": 8,
+    "maintenance_event": 2,
+    "maintenance_task": 5,
+    "product": 9,
+    "property": 1,
+    "tag": 2
+  },
+  "includes_audit_log": false,
+  "includes_secrets": false,
+  "encrypted": false,
+  "note": "Hand-written sample dataset. app_version and schema_version are null until the first Alembic migration exists; the importer treats null as the initial schema."
+}

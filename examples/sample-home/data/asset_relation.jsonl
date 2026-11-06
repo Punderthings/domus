@@ -1,0 +1,2 @@
+{"id": "01a1a901-5800-702b-8000-00000000002b", "created_at": "2026-11-05T00:00:00Z", "updated_at": "2026-11-05T00:00:00Z", "from_asset_id": "01a1a901-5800-7029-8000-000000000029", "to_asset_id": "01a1a901-5800-701a-8000-00000000001a", "kind": "networked_via", "detail": "Wi-Fi 5 GHz"}
+{"id": "01a1a901-5800-702c-8000-00000000002c", "created_at": "2026-11-05T00:00:00Z", "updated_at": "2026-11-05T00:00:00Z", "from_asset_id": "01a1a901-5800-701d-8000-00000000001d", "to_asset_id": "01a1a901-5800-701a-8000-00000000001a", "kind": "networked_via", "detail": "Wi-Fi 2.4 GHz"}

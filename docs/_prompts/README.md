@@ -14,6 +14,8 @@ It is documentation only. Nothing here is built, imported, or shipped.
 | [plan/data-storage-backup.md](plan/data-storage-backup.md) | Data model, file storage, and backup/restore design | AI, steered by human review |
 | [plan/frontend-options.md](plan/frontend-options.md) | Front end architecture options and the chosen option | AI, steered by human review |
 
+Related: the sample dataset described in the plan lives in [`examples/sample-home/`](../../examples/sample-home/README.md).
+
 ## Conventions
 
 - Add new prompts or specs as numbered files (`02-...md`) so the order of the conversation is preserved.

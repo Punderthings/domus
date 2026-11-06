@@ -22,3 +22,8 @@ Decisions made by Shane Curcuru during the initial planning session on 2026-11-0
 | 10 | Python version | Python 3.14+ for all work. |
 | 11 | Maintainer role | Add a Maintainer role: can add new items and program most IoT/HA items or integrations, but cannot change Admins and cannot edit selected "critical" components. Example: the teenager who adds a game console and TV but is not allowed to access the master bedroom controls. Storage design is proposed in the plan (critical flag + access rules) and awaits confirmation. |
 | 12 | Name and repository | The project is named **Domus**; the repository is `punderthings/domus`. |
+| 13 | Design docs location | Keep the design history in `docs/_prompts/` so all documentation is in one place. |
+| 14 | AGENTS.md | The plan follows the repository's AGENTS.md (ASF Category A licenses for every dependency, uv, no-network tests, commit trailers, maintainer approval for new dependencies, workflows, and backup-incompatible changes). |
+| 15 | Apple HomeKit | Add "Basic integration with Apple HomeKit" as a future version task, after the current set of tasks. |
+| 16 | Install guide | Add a comprehensive "How To Install Locally" guide as a v0.1 doc task, including how to make a backup and restore it, so maintainers can test between versions as we build. |
+| 17 | Example dataset | Add one simple example property with one home, a couple of rooms, and a handful of different devices, as a dataset that can be imported or added easily (`examples/sample-home/`). |

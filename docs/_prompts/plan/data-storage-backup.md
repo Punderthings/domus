@@ -244,12 +244,12 @@ How the snapshot is taken safely while the app runs: SQLite `VACUUM INTO 'tmp.sq
 
 ### 4.2 Backup features
 
-- **Manual backup**: "Download backup" button (Admin only) and `app backup create` CLI.
+- **Manual backup**: "Download backup" button (Admin only) and `domus backup create` CLI.
 - **Scheduled backups**: built-in scheduler (APScheduler, MIT) writes to `backups/` daily by default.
 - **Retention**: keep 7 daily, 4 weekly, 12 monthly by default; configurable.
 - **Optional encryption**: passphrase-encrypted archive using the `age` format via `pyrage` (MIT/Apache-2.0), so backups can be safely copied to cloud storage and decrypted with the standard `age` CLI. Passphrase never stored by the app.
 - **Off-site copies**: optional `S3BlobStore`-style upload target for archives, plus documented recipes for restic and Litestream for users who already run them.
-- **Verify**: `app backup verify <file>` and a UI button check every hash, open the snapshot, run `integrity_check`, and confirm every referenced blob is present. A scheduled weekly verify of the newest backup catches silent corruption.
+- **Verify**: `domus backup verify <file>` and a UI button check every hash, open the snapshot, run `integrity_check`, and confirm every referenced blob is present. A scheduled weekly verify of the newest backup catches silent corruption.
 - **Health indicator**: the admin dashboard shows "last successful backup N days ago" and warns after a configurable threshold.
 
 ### 4.3 Restore
@@ -257,7 +257,7 @@ How the snapshot is taken safely while the app runs: SQLite `VACUUM INTO 'tmp.sq
 - **Full restore (replace)**: Admin only, works with Home Assistant offline. Steps: verify archive, take an automatic safety backup of the current state, restore into a new temp database, run Alembic migrations forward if the archive is older, copy blobs, then atomically swap the database file and restart the app's DB pool. If anything fails, the current data is untouched.
 - **Merge import**: load JSONL rows and upsert by UUID. Rules: newer `updated_at` wins by default; conflicts are listed in a preview for the user to accept per record. Soft-deleted rows propagate deletions. This is the same code path used by partial exports and HA-free transfers between installs.
 - **Version rules**: restoring an archive from an older app version is always supported (migrate forward). Restoring a newer archive into an older app is refused with a clear message.
-- **CLI first**: `app restore <file> [--merge] [--dry-run]` exists so recovery works even if the web UI is broken.
+- **CLI first**: `domus restore <file> [--merge] [--dry-run]` exists so recovery works even if the web UI is broken.
 
 ### 4.4 Export and transfer
 
@@ -293,9 +293,9 @@ Keep the schema portable from day one (SQLAlchemy types only, UUIDs as text, JSO
 
 1. Create SQLAlchemy models and the initial Alembic migration for: property, building, spatial_relation, floor, area, location, product, asset, asset_identifier, asset_relation, tag, document, blob, attachment, maintenance_task, maintenance_event, user, membership, access_rule, audit_log. Add the core-dependency license check to CI at the same time. Enable SQLite WAL, foreign keys, and busy timeout on connect.
 2. Implement `LocalFsBlobStore` with streaming SHA-256, atomic writes, and an upload endpoint with type sniffing and EXIF stripping.
-3. Implement the scheduling service: `compute_next_due(task, last_event)` for both modes, with pytest parametrized tests (Hypothesis is MPL-2.0, acceptable as a dev-only test dependency if you want property tests) covering month-end and DST edges.
+3. Implement the scheduling service: `compute_next_due(task, last_event)` for both modes, with pytest parametrized tests covering month-end and DST edges. (Hypothesis is not used: it is MPL-2.0, which is ASF Category B, and AGENTS.md requires Category A for test tools too.)
 4. Implement JSONL export and import (full and partial with closure), then the `.hiotbak` writer, reader, and verifier on top.
-5. Add `app backup create|verify` and `app restore [--merge] [--dry-run]` CLI commands, then the scheduled backup job with retention.
+5. Add `domus backup create|verify` and `domus restore [--merge] [--dry-run]` CLI commands, then the scheduled backup job with retention.
 6. Implement the `AccessPolicy` service (four roles, access levels, rules, critical items) with a table-driven test suite covering role defaults, area vs asset vs tag precedence, membership vs role rules, expiry, and critical inheritance, before any endpoint ships.
 7. Add the FTS5 search index and read-only REST endpoints over the same service layer.
 8. CI: run model, migration, and backup round-trip tests (backup, wipe, restore, compare row counts and hashes) on SQLite and Postgres.
