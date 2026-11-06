@@ -38,6 +38,8 @@ cl = _load()
         "(MIT OR GPL-3.0-only)",
         "GPL-3.0-only OR MIT",
         "MIT License; Mozilla Public License 2.0 (MPL 2.0)",
+        "ISC License (ISCL)",
+        "zlib/libpng License",
     ],
 )
 def test_allowed(text: str) -> None:

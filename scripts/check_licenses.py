@@ -68,7 +68,16 @@ _AND = re.compile(r"\s+AND\s+")
 
 
 def _normalize(term: str) -> str:
-    term = term.strip().strip("()").strip()
+    term = term.strip()
+    # Splitting "(MIT OR X)" leaves "(MIT" and "X)": drop parentheses that
+    # have no partner, plus one enclosing pair, but keep balanced inner ones
+    # such as the "(ISCL)" in "ISC License (ISCL)".
+    if term.startswith("(") and term.count("(") > term.count(")"):
+        term = term[1:].strip()
+    if term.endswith(")") and term.count(")") > term.count("("):
+        term = term[:-1].strip()
+    if term.startswith("(") and term.endswith(")"):
+        term = term[1:-1].strip()
     return ALIASES.get(term, term)
 
 
