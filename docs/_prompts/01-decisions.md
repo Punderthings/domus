@@ -28,3 +28,4 @@ Decisions made by Shane Curcuru during the initial planning session on 2026-11-0
 | 16 | Install guide | Add a comprehensive "How To Install Locally" guide as a v0.1 doc task, including how to make a backup and restore it, so maintainers can test between versions as we build. |
 | 17 | Example dataset | Add one simple example property with one home, a couple of rooms, and a handful of different devices, as a dataset that can be imported or added easily (`examples/sample-home/`). |
 | 18 | Source layout | All source code lives under `src/`, following PyPA packaging standards (AGENTS.md updated): `src/domus/` for the Python package and `src/frontend/` for the React app. |
+| 19 | Type checker and MPL | Use pyright (MIT) instead of mypy, whose pathspec dependency is MPL-2.0. Avoid MPL dependencies unless no similar permissive alternative exists; then ask first and explain why the MPL dependency works better than the permissive options. |
