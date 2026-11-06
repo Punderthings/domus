@@ -93,7 +93,7 @@ def create_backup(engine: Engine, output: Path, *, blobs_dir: Path) -> BackupRes
             read_engine = create_engine(read_only_url(snapshot))
         try:
             with read_engine.connect() as conn, conn.begin():
-                counts = write_tables(conn, staging, export_tables(include_audit_log=True))
+                counts = write_tables(conn, staging, export_tables(full=True))
                 pids = property_ids(conn)
             missing = _copy_blobs(read_engine, blobs_dir, staging)
         finally:

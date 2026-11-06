@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 from sqlalchemy import Engine, func, select
+from sqlalchemy.orm import Session
 
 from domus.backup import ImportDataError, export_directory, import_source, open_source
 from domus.backup.codec import decode_row, encode_value, format_datetime
@@ -102,6 +103,27 @@ def test_export_then_reimport_skips_everything(
     report = _import_dir(engine, tmp_path / "export")
     assert report.total().inserted == report.total().updated == 0
     assert _counts(engine) == before
+
+
+def test_partial_export_leaves_out_accounts(
+    engine: Engine, sample_home: Path, tmp_path: Path
+) -> None:
+    """Exports handed to others never carry emails, password hashes, or the audit log."""
+    from domus.models import Membership, User
+
+    _import_dir(engine, sample_home)
+    with Session(engine) as s:
+        fake_hash = "$argon2id$not-a-real-hash"
+        user = User(email="a@example.com", display_name="A", password_hash=fake_hash)
+        s.add(user)
+        s.flush()
+        s.add(Membership(user_id=user.id, property_id=PROPERTY_ID, role="admin"))
+        s.commit()
+    export_directory(engine, tmp_path / "export")
+    data = tmp_path / "export" / "data"
+    for table in ("user", "membership", "audit_log"):
+        assert not (data / f"{table}.jsonl").exists()
+    assert "argon2id" not in "".join(p.read_text() for p in data.iterdir())
 
 
 def test_export_shape_matches_sample(engine: Engine, sample_home: Path, tmp_path: Path) -> None:

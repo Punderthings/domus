@@ -9,8 +9,10 @@ NEVER_EXPORTED = frozenset({"auth_session"})
 # API tokens are secrets: left out of every export, and refused on import so an
 # archive cannot plant a token someone else knows.
 SECRET_TABLES = frozenset({"api_token"})
-# The audit log is only carried by full backups.
-AUDIT_TABLES = frozenset({"audit_log"})
+# Only full backups carry the audit log, accounts (emails and password
+# hashes), and memberships. A partial export is meant to be handed to someone
+# else, such as a contractor, so it never includes them.
+FULL_ONLY_TABLES = frozenset({"audit_log", "user", "membership"})
 
 NOT_IMPORTABLE = NEVER_EXPORTED | SECRET_TABLES
 
@@ -20,9 +22,9 @@ def ordered_tables() -> list[Table]:
     return list(Base.metadata.sorted_tables)
 
 
-def export_tables(*, include_audit_log: bool) -> list[Table]:
+def export_tables(*, full: bool) -> list[Table]:
     """The tables an export writes, in foreign-key-safe order."""
-    skip = NOT_IMPORTABLE if include_audit_log else NOT_IMPORTABLE | AUDIT_TABLES
+    skip = NOT_IMPORTABLE if full else NOT_IMPORTABLE | FULL_ONLY_TABLES
     return [t for t in ordered_tables() if t.name not in skip]
 
 

@@ -86,7 +86,11 @@ def setup_status(db: DbSession) -> SetupStatus:
 
 @router.post("/setup", status_code=status.HTTP_201_CREATED)
 def setup(body: SetupIn, response: Response, db: DbSession, settings: SettingsDep) -> MeOut:
-    """Create the first Admin, their property, and its primary building. Works only once."""
+    """Create the first Admin, plus a property and its primary building on an empty install.
+
+    If properties were imported before setup, the Admin is added to all of them
+    and ``property_name`` is not used. Works only once.
+    """
     if (db.scalar(select(func.count()).select_from(User)) or 0) > 0:
         raise HTTPException(status.HTTP_409_CONFLICT, "Setup is already complete")
     user = User(
@@ -94,22 +98,31 @@ def setup(body: SetupIn, response: Response, db: DbSession, settings: SettingsDe
         display_name=body.display_name,
         password_hash=hash_password(body.password),
     )
-    prop = Property(name=body.property_name, timezone=body.timezone)
-    db.add_all([user, prop])
+    db.add(user)
+    # Data imported before setup (for example the sample home) has no members
+    # yet, so the first Admin gets every existing property. Only an empty
+    # install gets a new property with its primary building.
+    existing = list(db.scalars(select(Property).where(Property.deleted_at.is_(None))))
+    if not existing:
+        prop = Property(name=body.property_name, timezone=body.timezone)
+        db.add(prop)
+        db.flush()
+        db.add(Building(property_id=prop.id, name="House", kind="house", is_primary=True))
+        existing = [prop]
     db.flush()
-    db.add_all(
-        [
-            Building(property_id=prop.id, name="House", kind="house", is_primary=True),
-            Membership(user_id=user.id, property_id=prop.id, role=Role.ADMIN.value),
-            AuditLog(
-                user_id=user.id,
-                property_id=prop.id,
-                action="setup",
-                target_type="property",
-                target_id=prop.id,
-            ),
-        ]
-    )
+    for prop in existing:
+        db.add_all(
+            [
+                Membership(user_id=user.id, property_id=prop.id, role=Role.ADMIN.value),
+                AuditLog(
+                    user_id=user.id,
+                    property_id=prop.id,
+                    action="setup",
+                    target_type="property",
+                    target_id=prop.id,
+                ),
+            ]
+        )
     try:
         db.flush()
     except IntegrityError as exc:  # a concurrent setup won the race

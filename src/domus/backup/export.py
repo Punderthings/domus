@@ -89,7 +89,7 @@ def export_directory(engine: Engine, dest: Path) -> Manifest:
     schema = require_current_schema(engine)
     dest.mkdir(parents=True, exist_ok=True)
     with engine.connect() as conn, conn.begin():
-        counts = write_tables(conn, dest, export_tables(include_audit_log=False))
+        counts = write_tables(conn, dest, export_tables(full=False))
         pids = property_ids(conn)
     manifest = Manifest(
         format_version=FORMAT_VERSION,

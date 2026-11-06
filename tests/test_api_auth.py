@@ -1,8 +1,13 @@
 """Setup, login, sessions, CSRF, and personal access tokens."""
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from sqlalchemy import Engine
 from tests.asgi_client import Client
 from tests.conftest import ADMIN_EMAIL, PASSWORD
+
+from domus.backup import import_source, open_source
 
 
 def test_health(client: Client) -> None:
@@ -146,3 +151,24 @@ def test_personal_access_tokens(admin: Client, app: FastAPI, property_id: str) -
 def test_bad_bearer_token(client: Client) -> None:
     r = client.get("/api/v1/auth/me", headers={"authorization": "Bearer domus_pat_nope"})
     assert r.status_code == 401
+
+
+def test_setup_after_sample_import_adopts_imported_property(
+    client: Client, engine: Engine, sample_home: Path
+) -> None:
+    """Load the sample home first, then run setup: the Admin can see it."""
+    import_source(engine, open_source(sample_home))
+    r = client.post(
+        "/api/v1/auth/setup",
+        json={
+            "email": "o@example.com",
+            "display_name": "O",
+            "password": PASSWORD,
+            "property_name": "unused",
+        },
+    )
+    assert r.status_code == 201, r.text
+    props = client.get("/api/v1/properties").json()["items"]
+    assert [p["name"] for p in props] == ["Sample Home"]
+    assets = client.get("/api/v1/assets").json()["items"]
+    assert len(assets) == 9
