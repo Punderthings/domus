@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     session_days: int = 14
     login_max_failures: int = 5
     login_window_seconds: int = 300
+    # Largest total uncompressed size a backup archive may expand to (zip-bomb guard).
+    backup_max_bytes: int = 2 * 1024**3
 
     @property
     def sqlite_path(self) -> Path:

@@ -14,6 +14,14 @@ from domus.config import Settings
 from domus.db import make_engine, make_session_factory
 from domus.migrate import upgrade
 
+SAMPLE_HOME = Path(__file__).resolve().parents[1] / "examples" / "sample-home"
+
+
+@pytest.fixture
+def sample_home() -> Path:
+    """The unzipped sample dataset (read-only; copy it before changing anything)."""
+    return SAMPLE_HOME
+
 
 @pytest.fixture
 def engine(tmp_path: Path) -> Generator[Engine]:
