@@ -23,13 +23,19 @@ export function json(status: number, body?: unknown): Response {
 export function fakeApi(routes: Record<string, Handler>) {
   const calls: RecordedCall[] = [];
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = new URL(String(input), 'http://domus.test');
+    // openapi-fetch passes a Request; accept (url, init) too.
+    const request =
+      input instanceof Request
+        ? input
+        : new Request(new URL(String(input), 'http://domus.test'), init);
+    const url = new URL(request.url);
+    const text = await request.text();
     const call: RecordedCall = {
-      method: (init?.method ?? 'GET').toUpperCase(),
+      method: request.method.toUpperCase(),
       path: url.pathname.replace(/^\/api\/v1/, ''),
       search: url.searchParams,
-      headers: (init?.headers ?? {}) as Record<string, string>,
-      body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined,
+      headers: Object.fromEntries(request.headers.entries()),
+      body: text ? JSON.parse(text) : undefined,
     };
     calls.push(call);
     const handler = routes[`${call.method} ${call.path}`];

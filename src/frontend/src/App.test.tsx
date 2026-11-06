@@ -9,10 +9,11 @@ import {
   buildings,
   floors,
   fridge,
-  guestView,
+  fridgeForGuest,
   property,
   task,
   user,
+  withManual,
 } from './test/fixtures';
 import { renderApp } from './test/render';
 import { fakeApi, page, type RecordedCall } from './test/server';
@@ -196,7 +197,7 @@ describe('devices', () => {
   });
 
   it('shows a guest only what the API returns, with no cost or serial', async () => {
-    signedIn('guest', guestView(fridge));
+    signedIn('guest', fridgeForGuest);
     renderApp(`/devices/${FRIDGE_ID}`);
     expect(
       await screen.findByRole('heading', { name: 'Refrigerator', level: 2 }),
@@ -208,20 +209,7 @@ describe('devices', () => {
   });
 
   it('does not render unsafe manual links', async () => {
-    const bad = {
-      ...fridge,
-      product: {
-        ...(fridge.product ?? {
-          id: 'p',
-          created_at: '',
-          updated_at: '',
-          manufacturer: null,
-          model: null,
-        }),
-        manual_url: 'javascript:alert(1)',
-      },
-    };
-    signedIn('admin', bad);
+    signedIn('admin', withManual('javascript:alert(1)'));
     renderApp(`/devices/${FRIDGE_ID}`);
     await screen.findByRole('heading', { name: 'Refrigerator', level: 2 });
     expect(screen.queryByRole('link', { name: 'Open manual' })).not.toBeInTheDocument();

@@ -49,3 +49,12 @@ describe('pickMembership', () => {
     expect(pickMembership([], null, now)).toBeUndefined();
   });
 });
+
+describe('toRole', () => {
+  it('keeps known roles and gives unknown ones the least access', async () => {
+    const { toRole } = await import('./permissions');
+    expect(toRole('maintainer')).toBe('maintainer');
+    expect(toRole('superuser')).toBe('guest');
+    expect(toRole('')).toBe('guest');
+  });
+});

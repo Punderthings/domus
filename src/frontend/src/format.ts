@@ -68,3 +68,12 @@ export function safeHttpUrl(value: string | null | undefined): string | null {
     return null;
   }
 }
+
+/** The property's time zone starts as the browser's; an Admin can change it later. */
+export function browserTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}

@@ -1,24 +1,17 @@
 // TanStack Query hooks for each API resource, so pages never build URLs themselves.
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiError, apiRequest } from './client';
-import type {
-  Area,
-  Asset,
-  AssetDetail,
-  Building,
-  CurrentUser,
-  Floor,
-  MaintenanceTask,
-  Page,
-  Property,
-  SetupStatus,
-} from './types';
+import { ApiError, api, unwrap } from './client';
+import type { LoginInput, SetupInput } from './types';
+
+export type { LoginInput, SetupInput };
+
+/** The API's largest page size; v0.1 views show one page per list. */
+const LIMIT = 200;
 
 export const keys = {
   me: ['auth', 'me'] as const,
   setup: ['auth', 'setup'] as const,
-  properties: ['properties'] as const,
   property: (id: string) => ['properties', id] as const,
   buildings: (propertyId: string) => ['buildings', { propertyId }] as const,
   floors: (buildingId: string) => ['floors', { buildingId }] as const,
@@ -36,7 +29,7 @@ export function useCurrentUser() {
     queryKey: keys.me,
     queryFn: async ({ signal }) => {
       try {
-        return await apiRequest<CurrentUser>('/auth/me', { signal });
+        return await unwrap(api.GET('/api/v1/auth/me', { signal }));
       } catch (error) {
         if (error instanceof ApiError && error.status === 401) return null;
         throw error;
@@ -49,26 +42,15 @@ export function useCurrentUser() {
 export function useSetupStatus() {
   return useQuery({
     queryKey: keys.setup,
-    queryFn: ({ signal }) => apiRequest<SetupStatus>('/auth/setup', { signal }),
+    queryFn: ({ signal }) => unwrap(api.GET('/api/v1/auth/setup', { signal })),
     staleTime: Infinity,
   });
-}
-
-export interface LoginInput {
-  email: string;
-  password: string;
-}
-
-export interface SetupInput extends LoginInput {
-  display_name: string;
-  property_name: string;
 }
 
 export function useLogin() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: LoginInput) =>
-      apiRequest<undefined>('/auth/login', { method: 'POST', body: input }),
+    mutationFn: (body: LoginInput) => unwrap(api.POST('/api/v1/auth/login', { body })),
     onSuccess: () => client.invalidateQueries({ queryKey: keys.me }),
   });
 }
@@ -76,8 +58,7 @@ export function useLogin() {
 export function useSetup() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: SetupInput) =>
-      apiRequest<undefined>('/auth/setup', { method: 'POST', body: input }),
+    mutationFn: (body: SetupInput) => unwrap(api.POST('/api/v1/auth/setup', { body })),
     onSuccess: async () => {
       client.setQueryData(keys.setup, { needs_setup: false });
       await client.invalidateQueries({ queryKey: keys.me });
@@ -88,7 +69,7 @@ export function useSetup() {
 export function useLogout() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: () => apiRequest<undefined>('/auth/logout', { method: 'POST' }),
+    mutationFn: () => unwrap(api.POST('/api/v1/auth/logout')),
     onSettled: () => {
       client.clear();
       client.setQueryData(keys.me, null);
@@ -96,18 +77,16 @@ export function useLogout() {
   });
 }
 
-export function useProperties() {
-  return useQuery({
-    queryKey: keys.properties,
-    queryFn: ({ signal }) => apiRequest<Page<Property>>('/properties', { signal }),
-  });
-}
-
 export function useProperty(id: string | undefined) {
   return useQuery({
     queryKey: keys.property(id ?? ''),
     queryFn: ({ signal }) =>
-      apiRequest<Property>(`/properties/${encodeURIComponent(id ?? '')}`, { signal }),
+      unwrap(
+        api.GET('/api/v1/properties/{property_id}', {
+          params: { path: { property_id: id ?? '' } },
+          signal,
+        }),
+      ),
     enabled: Boolean(id),
   });
 }
@@ -116,10 +95,12 @@ export function useBuildings(propertyId: string | undefined) {
   return useQuery({
     queryKey: keys.buildings(propertyId ?? ''),
     queryFn: ({ signal }) =>
-      apiRequest<Page<Building>>('/buildings', {
-        params: { property_id: propertyId, limit: 200 },
-        signal,
-      }),
+      unwrap(
+        api.GET('/api/v1/buildings', {
+          params: { query: { property_id: propertyId, limit: LIMIT } },
+          signal,
+        }),
+      ),
     enabled: Boolean(propertyId),
   });
 }
@@ -128,10 +109,12 @@ export function useFloors(buildingId: string | undefined) {
   return useQuery({
     queryKey: keys.floors(buildingId ?? ''),
     queryFn: ({ signal }) =>
-      apiRequest<Page<Floor>>('/floors', {
-        params: { building_id: buildingId, limit: 200 },
-        signal,
-      }),
+      unwrap(
+        api.GET('/api/v1/floors', {
+          params: { query: { building_id: buildingId ?? '', limit: LIMIT } },
+          signal,
+        }),
+      ),
     enabled: Boolean(buildingId),
   });
 }
@@ -140,7 +123,12 @@ export function useAreas(propertyId: string | undefined) {
   return useQuery({
     queryKey: keys.areas(propertyId ?? ''),
     queryFn: ({ signal }) =>
-      apiRequest<Page<Area>>('/areas', { params: { property_id: propertyId, limit: 200 }, signal }),
+      unwrap(
+        api.GET('/api/v1/areas', {
+          params: { query: { property_id: propertyId, limit: LIMIT } },
+          signal,
+        }),
+      ),
     enabled: Boolean(propertyId),
   });
 }
@@ -154,10 +142,12 @@ export function useAssets(propertyId: string | undefined, filters: AssetFilters 
   return useQuery({
     queryKey: keys.assets(propertyId ?? '', filters),
     queryFn: ({ signal }) =>
-      apiRequest<Page<Asset>>('/assets', {
-        params: { property_id: propertyId, limit: 200, ...filters },
-        signal,
-      }),
+      unwrap(
+        api.GET('/api/v1/assets', {
+          params: { query: { property_id: propertyId, limit: LIMIT, ...filters } },
+          signal,
+        }),
+      ),
     enabled: Boolean(propertyId),
   });
 }
@@ -166,7 +156,7 @@ export function useAsset(id: string) {
   return useQuery({
     queryKey: keys.asset(id),
     queryFn: ({ signal }) =>
-      apiRequest<AssetDetail>(`/assets/${encodeURIComponent(id)}`, { signal }),
+      unwrap(api.GET('/api/v1/assets/{asset_id}', { params: { path: { asset_id: id } }, signal })),
   });
 }
 
@@ -180,10 +170,12 @@ export function useTasks(propertyId: string | undefined, filters: TaskFilters = 
   return useQuery({
     queryKey: keys.tasks(propertyId ?? '', filters),
     queryFn: ({ signal }) =>
-      apiRequest<Page<MaintenanceTask>>('/maintenance/tasks', {
-        params: { property_id: propertyId, limit: 200, ...filters },
-        signal,
-      }),
+      unwrap(
+        api.GET('/api/v1/maintenance/tasks', {
+          params: { query: { property_id: propertyId, limit: LIMIT, ...filters } },
+          signal,
+        }),
+      ),
     enabled: Boolean(propertyId),
   });
 }

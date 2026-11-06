@@ -78,6 +78,11 @@ jobs:
         run: node scripts/check-licenses.mjs
       - name: Install
         run: npm ci --ignore-scripts
+      # openapi.json itself is checked against the API by tests/test_openapi_snapshot.py.
+      - name: Generated API types match openapi.json
+        run: |
+          npm run api:types
+          git diff --exit-code -- src/api/schema.d.ts
       - name: ESLint
         run: npm run lint
       - name: Prettier

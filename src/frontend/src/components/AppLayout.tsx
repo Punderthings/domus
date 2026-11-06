@@ -15,7 +15,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { Link, Navigate, Outlet, useRouterState } from '@tanstack/react-router';
 import { useCurrentUser, useLogout, useProperty, useSetupStatus } from '../api/queries';
-import { ROLE_LABELS } from '../auth/permissions';
+import { ROLE_LABELS, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
 import { terms } from '../terms';
 import { ErrorNotice, PageLoader } from './States';
@@ -87,7 +87,7 @@ export function AppLayout() {
                   {user.data.display_name}
                   {membership && (
                     <Badge ml="xs" size="xs" variant="light">
-                      {ROLE_LABELS[membership.role]}
+                      {ROLE_LABELS[toRole(membership.role)]}
                     </Badge>
                   )}
                 </Menu.Label>
