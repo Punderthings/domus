@@ -38,11 +38,13 @@ data/<table>.jsonl     one JSON object per row, column names from the data model
 
 ## Importing
 
-The import isn't built yet. It is implementation step 11 in the [master plan](../../docs/_prompts/plan/HomeIOT-Master-Plan.md). The planned commands are:
+Import it into a new or existing database (the command migrates the database first):
 
 ```sh
 domus restore examples/sample-home --merge --dry-run   # preview
 domus restore examples/sample-home --merge             # import
 ```
+
+The import upserts by id, so running it again changes nothing. A test imports this dataset into a fresh database on every CI run and checks the row counts against `manifest.json`.
 
 When the data model changes, update this dataset in the same PR so it stays importable.
