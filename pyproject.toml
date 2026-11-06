@@ -76,5 +76,6 @@ typeCheckingMode = "strict"
 [tool.pytest.ini_options]
 minversion = "8.4"
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
 xfail_strict = true
