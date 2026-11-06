@@ -30,16 +30,17 @@ Tests never use the network: `src/test/server.ts` replaces `fetch` with an in-me
 
 ## Layout
 
-| Path                         | What it holds                                                                             |
-| :--------------------------- | :---------------------------------------------------------------------------------------- |
-| `src/api/`                   | `client.ts` (fetch, CSRF header, errors), `types.ts`, `queries.ts` (TanStack Query hooks) |
-| `src/auth/`                  | Role and access-level helpers, the active property                                        |
-| `src/components/`            | App shell, shared widgets                                                                 |
-| `src/pages/`                 | One component per route                                                                   |
-| `src/router.tsx`             | Routes (TanStack Router, code-based)                                                      |
-| `src/terms.ts`               | Display words for data model objects (Area, Device) in one place                          |
-| `src/test/`                  | Test setup, fixtures from `examples/sample-home/`, fake API                               |
-| `scripts/check-licenses.mjs` | Lockfile license check, no extra dependency                                               |
+| Path                         | What it holds                                                                                                                |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| `openapi.json`               | The backend's OpenAPI document, exported by `scripts/export_openapi.py`                                                      |
+| `src/api/`                   | `schema.d.ts` (generated), `client.ts` (openapi-fetch, CSRF header, errors), `types.ts`, `queries.ts` (TanStack Query hooks) |
+| `src/auth/`                  | Role and access-level helpers, the active property                                                                           |
+| `src/components/`            | App shell, shared widgets                                                                                                    |
+| `src/pages/`                 | One component per route                                                                                                      |
+| `src/router.tsx`             | Routes (TanStack Router, code-based)                                                                                         |
+| `src/terms.ts`               | Display words for data model objects (Area, Device) in one place                                                             |
+| `src/test/`                  | Test setup, fixtures from `examples/sample-home/`, fake API                                                                  |
+| `scripts/check-licenses.mjs` | Lockfile license check, no extra dependency                                                                                  |
 
 ## Notes
 
