@@ -15,14 +15,15 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { Link, Navigate, Outlet, useRouterState } from '@tanstack/react-router';
 import { useCurrentUser, useLogout, useProperty, useSetupStatus } from '../api/queries';
-import { ROLE_LABELS, toRole } from '../auth/permissions';
+import { ROLE_LABELS, hasRole, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
 import { terms } from '../terms';
 import { ErrorNotice, PageLoader } from './States';
 
 const NAV = [
-  { to: '/', label: 'Overview', exact: true },
-  { to: '/devices', label: terms.devices, exact: false },
+  { to: '/', label: 'Overview', exact: true, minRole: 'guest' },
+  { to: '/devices', label: terms.devices, exact: false, minRole: 'guest' },
+  { to: '/import/home-assistant', label: 'Import from HA', exact: false, minRole: 'maintainer' },
 ] as const;
 
 function ColorSchemeToggle() {
@@ -99,7 +100,9 @@ export function AppLayout() {
       </AppShell.Header>
 
       <AppShell.Navbar p="xs" aria-label="Main">
-        {NAV.map((item) => {
+        {NAV.filter((item) =>
+          hasRole(membership ? toRole(membership.role) : undefined, item.minRole),
+        ).map((item) => {
           const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
           return (
             <NavLink

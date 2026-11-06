@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, api, unwrap } from './client';
-import type { LoginInput, SetupInput } from './types';
+import type { HaApplyInput, HaConnectInput, LoginInput, SetupInput } from './types';
 
 export type { LoginInput, SetupInput };
 
@@ -177,5 +177,28 @@ export function useTasks(propertyId: string | undefined, filters: TaskFilters = 
         }),
       ),
     enabled: Boolean(propertyId),
+  });
+}
+
+/** Read Home Assistant's registries and show what an import would do. Changes nothing. */
+export function useHaPreview() {
+  return useMutation({
+    mutationFn: (body: HaConnectInput) =>
+      unwrap(api.POST('/api/v1/homeassistant/preview', { body })),
+  });
+}
+
+/** Apply a Home Assistant import, then refresh everything it may have added. */
+export function useHaApply() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: HaApplyInput) => unwrap(api.POST('/api/v1/homeassistant/apply', { body })),
+    onSuccess: async () => {
+      await Promise.all(
+        ['assets', 'areas', 'floors', 'buildings'].map((key) =>
+          client.invalidateQueries({ queryKey: [key] }),
+        ),
+      );
+    },
   });
 }

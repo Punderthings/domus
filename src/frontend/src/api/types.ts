@@ -35,3 +35,12 @@ export type Asset = Schemas['AssetOut'] | Schemas['AssetGuestOut'];
 /** Guests get no identifiers and none of the fields left out of `Asset`. */
 export type AssetDetail = Schemas['AssetDetailOut'] | Schemas['AssetGuestDetailOut'];
 export type MaintenanceTask = Schemas['TaskOut'];
+
+/** Home Assistant import: what the server would do, and what it did. */
+export type HaPreview = Schemas['ImportPreview'];
+export type HaDevicePlan = Schemas['DevicePlan'];
+export type HaFloorPlan = Schemas['FloorPlan'];
+export type HaDeviceChoice = Schemas['DeviceChoice'];
+export type HaConnectInput = Schemas['HaConnectIn'];
+export type HaApplyInput = Schemas['HaApplyIn'];
+export type HaImportResult = Schemas['ImportResult'];
