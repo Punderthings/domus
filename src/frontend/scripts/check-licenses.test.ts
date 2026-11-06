@@ -24,13 +24,44 @@ describe('checkLockfile', () => {
       packages: {
         '': { license: 'Apache-2.0' },
         'node_modules/good': { version: '1.0.0', license: 'MIT' },
-        'node_modules/lightningcss': { version: '1.33.0', license: 'MPL-2.0', dev: true },
+        'node_modules/other-mpl': { version: '1.0.0', license: 'MPL-2.0', dev: true },
         'node_modules/a/node_modules/nolicense': { version: '2.0.0' },
       },
     });
     expect(problems).toEqual([
-      'lightningcss@1.33.0: MPL-2.0 (dev)',
+      'other-mpl@1.0.0: MPL-2.0 (dev)',
       'nolicense@2.0.0: no license field (runtime)',
     ]);
+  });
+
+  it('allows lightningcss only as a build-only dev dependency under MPL-2.0', () => {
+    const lock = (info: object) => ({
+      packages: { 'node_modules/lightningcss': { version: '1.33.0', ...info } },
+    });
+    expect(checkLockfile(lock({ license: 'MPL-2.0', dev: true }))).toEqual([]);
+    expect(
+      checkLockfile({
+        packages: {
+          'node_modules/lightningcss-linux-x64-gnu': {
+            version: '1.33.0',
+            license: 'MPL-2.0',
+            dev: true,
+          },
+        },
+      }),
+    ).toEqual([]);
+    expect(checkLockfile(lock({ license: 'MPL-2.0' }))).toEqual([
+      'lightningcss@1.33.0: MPL-2.0 (runtime)',
+    ]);
+    expect(checkLockfile(lock({ license: 'GPL-3.0', dev: true }))).toEqual([
+      'lightningcss@1.33.0: GPL-3.0 (dev)',
+    ]);
+    expect(
+      checkLockfile({
+        packages: {
+          'node_modules/lightningcss-evil': { version: '1', license: 'MPL-2.0', dev: true },
+        },
+      }),
+    ).toEqual(['lightningcss-evil@1: MPL-2.0 (dev)']);
   });
 });

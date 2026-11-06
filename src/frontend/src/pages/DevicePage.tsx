@@ -74,7 +74,7 @@ export function DevicePage() {
             <Field label="Manufacturer">{d.product?.manufacturer ?? '—'}</Field>
             <Field label="Model">{d.product?.model ?? '—'}</Field>
             <Field label="Status">{humanize(d.status)}</Field>
-            <Field label="Installed">{formatDate(d.install_date)}</Field>
+            {'install_date' in d && <Field label="Installed">{formatDate(d.install_date)}</Field>}
             {'warranty_expires' in d && (
               <Field label="Warranty until">{formatDate(d.warranty_expires)}</Field>
             )}

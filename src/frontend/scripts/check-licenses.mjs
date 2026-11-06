@@ -26,6 +26,23 @@ export const ALLOWED = new Set([
   'Zlib',
 ]);
 
+/**
+ * Build-only tools allowed under a non-Category-A license, by package name, with
+ * the one license accepted for each. They must be dev dependencies that never
+ * end up in the built app. Decision 20 (Shane, 2026-11-06): Vite 8 needs
+ * lightningcss (MPL-2.0) and its per-platform binaries.
+ */
+export const BUILD_ONLY_EXCEPTIONS = [
+  { name: /^lightningcss(-(android|darwin|freebsd|linux|win32)-[a-z0-9-]+)?$/, license: 'MPL-2.0' },
+];
+
+function isBuildOnlyException(name, info) {
+  return (
+    info.dev === true &&
+    BUILD_ONLY_EXCEPTIONS.some((rule) => rule.name.test(name) && rule.license === info.license)
+  );
+}
+
 /** Return true if an SPDX expression is satisfied by the allowed set. */
 export function isAllowed(expression, allowed) {
   const text = String(expression ?? '').trim();
@@ -46,7 +63,7 @@ export function checkLockfile(lock) {
   for (const [path, info] of Object.entries(lock.packages ?? {})) {
     if (path === '') continue; // the project itself
     const name = path.replace(/^.*node_modules\//, '');
-    if (!isAllowed(info.license, ALLOWED)) {
+    if (!isAllowed(info.license, ALLOWED) && !isBuildOnlyException(name, info)) {
       const scope = info.dev ? 'dev' : 'runtime';
       problems.push(`${name}@${info.version}: ${info.license ?? 'no license field'} (${scope})`);
     }

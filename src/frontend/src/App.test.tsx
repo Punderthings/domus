@@ -203,6 +203,7 @@ describe('devices', () => {
     ).toBeInTheDocument();
     expect(screen.queryByText('Purchase price')).not.toBeInTheDocument();
     expect(screen.queryByText('Warranty until')).not.toBeInTheDocument();
+    expect(screen.queryByText('Installed')).not.toBeInTheDocument();
     expect(screen.queryByText('Identifiers')).not.toBeInTheDocument();
   });
 

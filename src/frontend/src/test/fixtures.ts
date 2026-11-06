@@ -88,7 +88,7 @@ export const fridge: AssetDetail = {
   install_date: '2021-03-14',
   is_critical: false,
   notes: 'Water filter part FR-WF1, behind the lower grille.',
-  purchase_price: 1899,
+  purchase_price: '1899.00',
   warranty_expires: '2026-03-14',
   tags: [{ id: 't1', name: 'smart', color: '#228be6' }],
   product: {
@@ -115,6 +115,7 @@ export function guestView(asset: AssetDetail): AssetDetail {
   delete copy.purchase_price;
   delete copy.identifiers;
   delete copy.warranty_expires;
+  delete copy.install_date;
   return copy;
 }
 

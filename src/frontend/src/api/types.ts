@@ -110,8 +110,8 @@ export interface Asset extends Row {
   install_date?: string | null;
   is_critical: boolean;
   notes?: string | null;
-  /** Omitted for guests. */
-  purchase_price?: number | null;
+  /** Decimal string such as "49.99". Omitted for guests. */
+  purchase_price?: string | null;
   warranty_expires?: string | null;
   tags?: Tag[];
 }

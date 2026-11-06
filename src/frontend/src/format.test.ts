@@ -42,7 +42,9 @@ describe('dueState', () => {
 describe('formatMoney and humanize', () => {
   it('formats currency', () => {
     expect(formatMoney(1899, 'USD', 'en-US')).toBe('$1,899.00');
+    expect(formatMoney('49.99', 'USD', 'en-US')).toBe('$49.99');
     expect(formatMoney(undefined)).toBe('—');
+    expect(formatMoney('n/a')).toBe('n/a');
   });
   it('turns enum values into labels', () => {
     expect(humanize('pool_house')).toBe('Pool house');

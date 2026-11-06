@@ -39,13 +39,16 @@ export function dueState(
   return 'upcoming';
 }
 
+/** Money arrives from the API as a decimal string such as "49.99". */
 export function formatMoney(
-  amount: number | null | undefined,
+  amount: string | number | null | undefined,
   currency = 'USD',
   locale?: string,
 ): string {
-  if (amount === null || amount === undefined) return '—';
-  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
+  if (amount === null || amount === undefined || amount === '') return '—';
+  const value = typeof amount === 'number' ? amount : Number(amount);
+  if (!Number.isFinite(value)) return String(amount);
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 }
 
 /** "appliance" -> "Appliance", "pool_house" -> "Pool house". */

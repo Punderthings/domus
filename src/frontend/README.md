@@ -47,8 +47,9 @@ Tests never use the network: `src/test/server.ts` replaces `fetch` with an in-me
   publishes `openapi.json`, it will be generated from that instead.
 - The UI hides what a role can't do, but the API enforces every rule. Guests get responses
   with sensitive fields removed, and pages show only the fields that are present.
-- Toolchain choices that keep every dependency ASF Category A (decision 19, no MPL): Vite 7
-  rather than 8 (Vite 8 requires `lightningcss`, MPL-2.0), `@vitejs/plugin-react-swc` rather
-  than the Babel plugin (Babel pulls in `caniuse-lite`, CC-BY-4.0), and
+- Every dependency is ASF Category A except one build-only exception (decision 20): Vite 8
+  requires `lightningcss` (MPL-2.0), which runs at build time and is never part of the built
+  app. `scripts/check-licenses.mjs` allows it by name, as a dev dependency only. Other
+  choices keep Category B out: `@vitejs/plugin-react-swc` rather than the Babel plugin (Babel pulls in `caniuse-lite`, CC-BY-4.0), and
   `eslint-plugin-react-hooks` 5 with ESLint 9. The system font stack is used instead of a
   bundled font, because most open fonts use the OFL (Category B).
