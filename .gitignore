@@ -221,3 +221,6 @@ __marimo__/
 
 # Domus: built front end copied into the package
 src/domus/static/
+
+# Domus: local security audit reports (scripts/security_audit.py)
+/security-audit*.md

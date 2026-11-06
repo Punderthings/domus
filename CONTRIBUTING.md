@@ -37,6 +37,32 @@ is an occasional MPL-2.0 build-time tool that is completely separate from applic
 code: a maintainer reviews it, and it is listed by name in `BUILD_ONLY` in
 `scripts/check_licenses.py` (or the front end's own license check).
 
+## Security audit
+
+Maintainers check the locked dependencies for known vulnerabilities from time to time.
+It is not part of CI, because it needs the network and its answer changes as new
+advisories are published, not as the code changes. From the repository root:
+
+```sh
+uv run python scripts/security_audit.py --output security-audit.md
+```
+
+It needs uv, npm, and network access. It audits every package pinned in `uv.lock` and
+`src/frontend/package-lock.json`, dev and build tools included, at the exact locked
+version:
+
+- Python: `pip-audit` (Apache-2.0), against the PyPI vulnerability feed. It runs at a
+  pinned version through `uvx`, so it is not a project dependency.
+- npm: `npm audit --package-lock-only`, against the GitHub Advisory Database. It reads
+  only the lockfile, so you don't need to run `npm install` first.
+
+The report lists each finding with its advisory ids, severity, and fix version, followed
+by every package marked runtime or dev. It exits 0 when it finds nothing, 1 when it finds
+advisories, and 2 when a tool could not run. The report is written in all three cases.
+`security-audit*.md` in the repository root is git-ignored. To audit a pull request,
+check out its branch and run the same command. Open an issue or a pull request for each
+finding you act on.
+
 ## Pull requests
 
 Work on a branch and open a pull request against `main`. Keep changes small; a maintainer
