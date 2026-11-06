@@ -50,12 +50,13 @@ jobs:
           uv sync --locked --no-dev
           uv run --no-sync --with pip-licenses pip-licenses --from=mixed --format=json \
             | uv run --no-sync python scripts/check_licenses.py
-      # Everything, including build, lint, and test tools (AGENTS.md).
+      # Everything, including build, lint, and test tools (AGENTS.md). Reviewed
+      # build-only MPL tools are accepted here only (decision 20).
       - name: Check all dependency groups
         run: |
           uv sync --locked --all-groups
           uv run --no-sync pip-licenses --from=mixed --format=json \
-            | uv run --no-sync python scripts/check_licenses.py
+            | uv run --no-sync python scripts/check_licenses.py --allow-build-only
 
   frontend:
     name: Front end lint, type check, test, build, licenses
