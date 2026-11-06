@@ -15,6 +15,16 @@ npm ci
 npm run dev          # http://localhost:5173, forwards /api to a local `domus serve` on :8000
 ```
 
+To try the built app the way users get it, build it and let the backend serve it:
+
+```sh
+npm run build                     # writes src/domus/static/
+cd ../.. && uv run domus serve    # http://127.0.0.1:8000
+```
+
+`domus serve` serves the files in `src/domus/static/` with a strict Content-Security-Policy,
+and returns `index.html` for app routes such as `/devices/<id>`.
+
 Run the same checks CI runs:
 
 ```sh

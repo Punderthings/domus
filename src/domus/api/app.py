@@ -6,6 +6,7 @@ from sqlalchemy import Engine
 from domus import __version__
 from domus.api.routers import admin, assets, auth, maintenance, space
 from domus.api.security import LoginRateLimiter
+from domus.api.spa import mount_spa
 from domus.config import Settings, get_settings
 from domus.db import make_engine, make_session_factory
 from domus.migrate import upgrade
@@ -41,4 +42,6 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
         app.include_router(module.router, prefix=API_PREFIX)
     # The feed lives outside /api/v1 so calendar URLs stay short and stable.
     app.include_router(maintenance.calendar_router)
+    # Last, so the front end's catch-all route never shadows the API.
+    mount_spa(app)
     return app
