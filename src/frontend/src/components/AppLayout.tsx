@@ -7,13 +7,15 @@ import {
   Menu,
   NavLink,
   Text,
+  TextInput,
   Title,
   Tooltip,
   useComputedColorScheme,
   useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Link, Navigate, Outlet, useRouterState } from '@tanstack/react-router';
+import { Link, Navigate, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
+import { useState, type FormEvent } from 'react';
 import { useCurrentUser, useLogout, useProperty, useSetupStatus } from '../api/queries';
 import { ROLE_LABELS, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
@@ -23,7 +25,32 @@ import { ErrorNotice, PageLoader } from './States';
 const NAV = [
   { to: '/', label: 'Overview', exact: true },
   { to: '/devices', label: terms.devices, exact: false },
+  { to: '/search', label: 'Search', exact: true },
 ] as const;
+
+/** The header search box; Enter opens the search page with the results. */
+function HeaderSearch() {
+  const navigate = useNavigate();
+  const [text, setText] = useState('');
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const q = text.trim();
+    if (!q) return;
+    setText('');
+    void navigate({ to: '/search', search: { q } });
+  };
+  return (
+    <form role="search" onSubmit={submit}>
+      <TextInput
+        aria-label="Search everything"
+        placeholder="Search"
+        value={text}
+        onChange={(event) => setText(event.currentTarget.value)}
+        w={{ base: 140, sm: 240 }}
+      />
+    </form>
+  );
+}
 
 function ColorSchemeToggle() {
   const { setColorScheme } = useMantineColorScheme();
@@ -75,6 +102,7 @@ export function AppLayout() {
             )}
           </Group>
           <Group gap="xs" wrap="nowrap">
+            {membership && pathname !== '/search' && <HeaderSearch />}
             <ColorSchemeToggle />
             <Menu position="bottom-end">
               <Menu.Target>

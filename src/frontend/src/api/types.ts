@@ -35,3 +35,5 @@ export type Asset = Schemas['AssetOut'] | Schemas['AssetGuestOut'];
 /** Guests get no identifiers and none of the fields left out of `Asset`. */
 export type AssetDetail = Schemas['AssetDetailOut'] | Schemas['AssetGuestDetailOut'];
 export type MaintenanceTask = Schemas['TaskOut'];
+/** Search hits: devices and areas, best match first, hidden items left out. */
+export type SearchResults = Schemas['SearchOut'];

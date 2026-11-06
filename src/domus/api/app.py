@@ -4,12 +4,13 @@ from fastapi import FastAPI
 from sqlalchemy import Engine
 
 from domus import __version__
-from domus.api.routers import admin, assets, auth, maintenance, space
+from domus.api.routers import admin, assets, auth, maintenance, search, space
 from domus.api.security import LoginRateLimiter
 from domus.api.spa import mount_spa
 from domus.config import Settings, get_settings
 from domus.db import make_engine, make_session_factory
 from domus.migrate import upgrade
+from domus.services import search as search_index
 
 API_PREFIX = "/api/v1"
 
@@ -19,6 +20,8 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
     settings = settings or get_settings()
     engine = engine or make_engine(settings.resolved_database_url())
     upgrade(engine)
+    with engine.begin() as conn:
+        search_index.ensure_built(conn)
 
     app = FastAPI(
         title="Domus",
@@ -38,7 +41,7 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
     def health() -> dict[str, str]:  # pyright: ignore[reportUnusedFunction]
         return {"status": "ok", "version": __version__}
 
-    for module in (auth, space, assets, maintenance, admin):
+    for module in (auth, space, assets, maintenance, search, admin):
         app.include_router(module.router, prefix=API_PREFIX)
     # The feed lives outside /api/v1 so calendar URLs stay short and stable.
     app.include_router(maintenance.calendar_router)

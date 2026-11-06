@@ -20,6 +20,7 @@ from domus.backup.errors import ImportDataError
 from domus.backup.export import data_name, table_for_data_name
 from domus.backup.source import BackupSource
 from domus.backup.tables import importable_table, ordered_tables
+from domus.services import search
 
 Key = tuple[Any, ...]
 
@@ -163,5 +164,7 @@ def import_source(engine: Engine, source: BackupSource, *, dry_run: bool = False
         if dry_run:
             tx.rollback()
         else:
+            # Core inserts bypass the ORM listener, so re-index everything.
+            search.rebuild(conn)
             tx.commit()
     return report

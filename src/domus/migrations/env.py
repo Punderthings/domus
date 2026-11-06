@@ -3,6 +3,7 @@
 from alembic import context
 
 from domus.models import Base
+from domus.services.search import include_in_migrations
 
 config = context.config
 target_metadata = Base.metadata
@@ -27,6 +28,7 @@ def _run(connection: object) -> None:
         target_metadata=target_metadata,
         render_as_batch=True,  # SQLite needs batch mode for ALTER TABLE
         compare_type=True,
+        include_name=include_in_migrations,
     )
     with context.begin_transaction():
         context.run_migrations()

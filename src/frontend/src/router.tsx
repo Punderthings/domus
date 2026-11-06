@@ -12,6 +12,7 @@ import { DevicePage } from './pages/DevicePage';
 import { DevicesPage } from './pages/DevicesPage';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
+import { SearchPage } from './pages/SearchPage';
 import { SetupPage } from './pages/SetupPage';
 
 const rootRoute = createRootRoute({ component: Outlet, notFoundComponent: NotFound });
@@ -63,10 +64,23 @@ const deviceRoute = createRoute({
   component: DevicePage,
 });
 
+export interface SearchPageSearch {
+  q?: string;
+}
+
+const searchRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/search',
+  component: SearchPage,
+  validateSearch: (search: Record<string, unknown>): SearchPageSearch => ({
+    q: typeof search.q === 'string' && search.q ? search.q : undefined,
+  }),
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   setupRoute,
-  appRoute.addChildren([overviewRoute, areaRoute, devicesRoute, deviceRoute]),
+  appRoute.addChildren([overviewRoute, areaRoute, devicesRoute, deviceRoute, searchRoute]),
 ]);
 
 export function createAppRouter(history: RouterHistory) {
@@ -79,4 +93,4 @@ declare module '@tanstack/react-router' {
   }
 }
 
-export { areaRoute, deviceRoute, devicesRoute };
+export { areaRoute, deviceRoute, devicesRoute, searchRoute };

@@ -519,6 +519,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search
+         * @description Find devices and areas by name, notes, product, tags, place, or identifier.
+         *
+         *     Every word must match, as a word prefix ("therm" finds "Thermostat").
+         *     Guests never match on identifiers such as serial numbers or MAC
+         *     addresses, or on vendors, since guest responses leave those out.
+         */
+        get: operations["search_api_v1_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/properties/{property_id}/members": {
         parameters: {
             query?: never;
@@ -1570,6 +1594,18 @@ export interface components {
             timezone?: string | null;
             /** Default Currency */
             default_currency?: string | null;
+        };
+        /**
+         * SearchOut
+         * @description Best matches first, at most ``limit`` of each kind, hidden items left out.
+         */
+        SearchOut: {
+            /** Query */
+            query: string;
+            /** Assets */
+            assets: (components["schemas"]["AssetOut"] | components["schemas"]["AssetGuestOut"])[];
+            /** Areas */
+            areas: components["schemas"]["AreaOut"][];
         };
         /** SetupIn */
         SetupIn: {
@@ -3239,6 +3275,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Page_Union_EventOut__EventGuestOut__"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_api_v1_search_get: {
+        parameters: {
+            query: {
+                q: string;
+                property_id?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOut"];
                 };
             };
             /** @description Validation Error */
