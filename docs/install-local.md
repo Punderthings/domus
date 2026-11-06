@@ -333,6 +333,14 @@ downgrade is refused cleanly instead of losing data. The steps use uv and two ch
 **OLD** (for example the last release tag) and **NEW** (the branch under test), with a
 scratch data folder so your own data is never touched.
 
+> **During v0.1 and v0.2, compatibility isn't required.** Shane decided that the schema
+> and backup format can change freely in these releases, with no need to upgrade older
+> databases or restore older backups. Until v0.3, run this checklist to find out what
+> breaks and say so in the release notes, rather than as a release gate. A failure in
+> the "upgrade in place" or "restore the OLD backup" steps is then expected when the
+> schema changed; the "downgrade is refused" steps still have to pass, so old versions
+> never load data they can't read.
+
 Set up once:
 
 ```sh
