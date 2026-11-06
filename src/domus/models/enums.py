@@ -151,3 +151,10 @@ DOCUMENT_KINDS = (
     "other",
 )
 SENSITIVITIES = ("guest", "resident", "admin")
+
+CANVAS_KINDS = ("floor_plan", "wall_photo", "panel_photo", "site_plan")
+CANVAS_SCOPES = ("property", "building", "floor", "area")
+# Upload types the server accepts, found by magic bytes rather than the
+# client's Content-Type. SVG is left out: it can carry script.
+IMAGE_MIME_TYPES = ("image/jpeg", "image/png", "image/webp", "image/gif")
+UPLOAD_MIME_TYPES = (*IMAGE_MIME_TYPES, "application/pdf")

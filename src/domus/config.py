@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     login_window_seconds: int = 300
     # Largest total uncompressed size a backup archive may expand to (zip-bomb guard).
     backup_max_bytes: int = 2 * 1024**3
+    # Largest single file upload (photos, floor plans, manuals).
+    upload_max_bytes: int = 25 * 1024**2
 
     @property
     def sqlite_path(self) -> Path:
