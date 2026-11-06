@@ -84,10 +84,33 @@ def test_find_violations_uses_overrides_and_skips_self() -> None:
 def test_main_exit_codes() -> None:
     good = io.StringIO(json.dumps([{"Name": "a", "Version": "1", "License": "MIT"}]))
     out = io.StringIO()
-    assert cl.main(good, out) == 0
+    assert cl.main([], good, out) == 0
     assert "All 1 distributions" in out.getvalue()
 
     bad = io.StringIO(json.dumps([{"Name": "b", "Version": "1", "License": "GPL-3.0-only"}]))
     out = io.StringIO()
-    assert cl.main(bad, out) == 1
+    assert cl.main([], bad, out) == 1
     assert "b 1: GPL-3.0-only" in out.getvalue()
+
+
+_MPL_TOOL = {"Name": "Some-Tool", "Version": "1.0", "License": "MPL-2.0"}
+
+
+def test_build_only_exception_applies_only_to_listed_packages() -> None:
+    build_only = {"some-tool": "build-time only, reviewed"}
+    assert cl.find_violations([_MPL_TOOL], build_only) == []
+    assert cl.find_violations([_MPL_TOOL]) == ["Some-Tool 1.0: MPL-2.0"]
+    other = {"Name": "other", "Version": "2.0", "License": "MPL-2.0"}
+    assert cl.find_violations([other], build_only) == ["other 2.0: MPL-2.0"]
+
+
+def test_build_only_exception_never_allows_lgpl() -> None:
+    lgpl = {"Name": "some-tool", "Version": "1.0", "License": "LGPL-3.0-only"}
+    assert cl.find_violations([lgpl], {"some-tool": "reviewed"}) == ["some-tool 1.0: LGPL-3.0-only"]
+
+
+def test_main_build_only_flag(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(cl, "BUILD_ONLY", {"some-tool": "reviewed"})
+    data = json.dumps([_MPL_TOOL])
+    assert cl.main([], io.StringIO(data), io.StringIO()) == 1
+    assert cl.main(["--allow-build-only"], io.StringIO(data), io.StringIO()) == 0

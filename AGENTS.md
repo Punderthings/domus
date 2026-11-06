@@ -64,6 +64,9 @@ Run the same checks CI runs with `uv run ruff check .`, `uv run ruff format --ch
 - **Dependencies.** Every dependency, including build and test tools, must use a
   license on the ASF Category A list
   (<https://www.apache.org/legal/resolved.html#category-a>). Name the license in the PR.
+  The one exception: an occasional MPL-2.0 build-time tool that is completely separate
+  from application code, after a maintainer reviews it (decisions 19 and 20 in
+  `docs/_prompts/01-decisions.md`).
 - **Tests:** add tests for all functionality and edge cases. Tests must not use the network;
   stub or mock every fetch. This keeps tests fast and repeatable.
 - **Minimal diffs:** no unrelated refactors, reformatting, or whitespace churn.

@@ -9,14 +9,20 @@ Usage (CI runs this after ``uv sync``)::
     uv run pip-licenses --from=mixed --format=json | uv run python scripts/check_licenses.py
 
 The script reads pip-licenses JSON on stdin, so it never touches the network.
+
+Pass ``--allow-build-only`` to also accept the packages in ``BUILD_ONLY``.
+CI does that only for the all-groups check. The core install is checked
+without it, so a ``BUILD_ONLY`` package that reaches the core install still
+fails the build.
 Adding a license to ``ALLOWED`` or a package to ``OVERRIDES`` needs a
 maintainer's review.
 """
 
+import argparse
 import json
 import re
 import sys
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from typing import TextIO
 
 # SPDX ids from the ASF Category A list that we expect to meet. Kept short on
@@ -50,6 +56,7 @@ ALIASES: Mapping[str, str] = {
     "Apache License, Version 2.0": "Apache-2.0",
     "ISC License (ISCL)": "ISC",
     "MIT License": "MIT",
+    "Mozilla Public License 2.0 (MPL 2.0)": "MPL-2.0",
     "Python Software Foundation License": "PSF-2.0",
     "zlib/libpng License": "Zlib",
 }
@@ -59,6 +66,13 @@ ALIASES: Mapping[str, str] = {
 OVERRIDES: Mapping[str, str] = {
     "nodeenv": "BSD-3-Clause",  # classifier says only "BSD License"
 }
+
+# Build-time tools completely separate from application code may
+# occasionally use MPL-2.0 (Shane, decision 20 in docs/_prompts/01-decisions.md).
+# Each entry is one reviewed package name mapped to the reason it is needed.
+# Entries are honored only with --allow-build-only, never for the core install.
+BUILD_ONLY_LICENSES: frozenset[str] = frozenset({"MPL-2.0"})
+BUILD_ONLY: Mapping[str, str] = {}
 
 # The distribution being checked is our own project.
 SELF: frozenset[str] = frozenset({"domus"})
@@ -81,7 +95,7 @@ def _normalize(term: str) -> str:
     return ALIASES.get(term, term)
 
 
-def is_allowed(license_text: str) -> bool:
+def is_allowed(license_text: str, allowed: frozenset[str] = ALLOWED) -> bool:
     """Return True if a license string is acceptable.
 
     Handles simple SPDX expressions (``A OR B``, ``A AND B``) and the
@@ -96,28 +110,48 @@ def is_allowed(license_text: str) -> bool:
     choices = [c for part in text.split(";") for c in _OR.split(part)]
     for choice in choices:
         parts = [_normalize(p) for p in _AND.split(choice)]
-        if parts and all(p in ALLOWED for p in parts):
+        if parts and all(p in allowed for p in parts):
             return True
     return False
 
 
-def find_violations(packages: Iterable[Mapping[str, str]]) -> list[str]:
-    """Return one message per package whose license is not allowed."""
+def find_violations(
+    packages: Iterable[Mapping[str, str]],
+    build_only: Mapping[str, str] | None = None,
+) -> list[str]:
+    """Return one message per package whose license is not allowed.
+
+    ``build_only`` names reviewed build-time packages that may also use a
+    license in ``BUILD_ONLY_LICENSES``. Pass it only for dev/build checks.
+    """
     problems: list[str] = []
     for pkg in packages:
         name = pkg.get("Name", "")
         if name.lower() in SELF:
             continue
-        license_text = OVERRIDES.get(name.lower(), pkg.get("License", ""))
-        if not is_allowed(license_text):
+        key = name.lower()
+        license_text = OVERRIDES.get(key, pkg.get("License", ""))
+        allowed = ALLOWED | BUILD_ONLY_LICENSES if build_only and key in build_only else ALLOWED
+        if not is_allowed(license_text, allowed):
             version = pkg.get("Version", "?")
             problems.append(f"{name} {version}: {license_text or 'no license metadata'}")
     return sorted(problems, key=str.lower)
 
 
-def main(stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout) -> int:
+def main(
+    argv: Sequence[str] | None = None,
+    stdin: TextIO = sys.stdin,
+    stdout: TextIO = sys.stdout,
+) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0] if __doc__ else None)
+    parser.add_argument(
+        "--allow-build-only",
+        action="store_true",
+        help="also accept the reviewed build-time packages in BUILD_ONLY",
+    )
+    args = parser.parse_args(argv)
     packages: list[dict[str, str]] = json.load(stdin)
-    problems = find_violations(packages)
+    problems = find_violations(packages, BUILD_ONLY if args.allow_build_only else None)
     if problems:
         stdout.write("Dependencies with licenses outside the ASF Category A allowlist:\n")
         for problem in problems:

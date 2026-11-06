@@ -32,7 +32,10 @@ Tests must not use the network; stub or mock every fetch.
 Every dependency, including build and test tools, must use a license on the
 [ASF Category A list](https://www.apache.org/legal/resolved.html#category-a). Name the
 license in your pull request. Ask a maintainer before adding a dependency, a tool, or a
-GitHub Actions workflow. The license check fails CI on anything else.
+GitHub Actions workflow. The license check fails CI on anything else. The one exception
+is an occasional MPL-2.0 build-time tool that is completely separate from application
+code: a maintainer reviews it, and it is listed by name in `BUILD_ONLY` in
+`scripts/check_licenses.py` (or the front end's own license check).
 
 ## Pull requests
 
