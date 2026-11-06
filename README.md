@@ -1,5 +1,6 @@
-# domus
-Holistic home helper: IOT inventory, mapping, control, and Home Assistant integration
+# domus :house_with_garden:
+
+Holistic home helper: IOT inventory, mapping, control, and Home Assistant integration.
 
 ## Status
 
