@@ -34,6 +34,9 @@ def get_settings(request: Request) -> Settings:
     return settings
 
 
+SettingsDep = Annotated[Settings, Depends(get_settings)]
+
+
 def get_db(request: Request) -> Generator[Session]:
     """One session per request; commits if the endpoint returns normally."""
     factory: sessionmaker[Session] = request.app.state.session_factory
