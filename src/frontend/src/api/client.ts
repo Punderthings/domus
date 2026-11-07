@@ -65,3 +65,32 @@ export async function unwrap<T>(
   if (!response.ok) throw new ApiError(response.status, errorDetail(error));
   return data as T;
 }
+
+/**
+ * Upload one file as the raw request body (the API takes no multipart forms).
+ * `query` becomes the query string, for example `{ kind: 'floor_plan' }`.
+ */
+export async function uploadFile<T>(
+  path: string,
+  file: Blob,
+  query: Record<string, string | undefined> = {},
+): Promise<T> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) if (value) params.set(key, value);
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': file.type || 'application/octet-stream',
+  };
+  const token = readCookie(CSRF_COOKIE);
+  if (token) headers[CSRF_HEADER] = token;
+  const base = globalThis.location?.origin ?? '';
+  const response = await globalThis.fetch(`${base}${path}?${params.toString()}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers,
+    body: file,
+  });
+  const body: unknown = await response.json().catch(() => null);
+  if (!response.ok) throw new ApiError(response.status, errorDetail(body));
+  return body as T;
+}
