@@ -34,6 +34,7 @@ const NAV = [
   { to: '/devices', label: terms.devices, exact: false, minRole: 'guest' },
   { to: '/search', label: 'Search', exact: true, minRole: 'guest' },
   { to: '/import/home-assistant', label: 'Import from HA', exact: false, minRole: 'maintainer' },
+  { to: '/admin/backups', label: 'Backups', exact: false, minRole: 'admin' },
 ] as const;
 
 /** The header search box; Enter opens the search page with the results. */

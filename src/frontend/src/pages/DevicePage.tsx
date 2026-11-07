@@ -1,4 +1,4 @@
-import { AnchorLink } from '../components/links';
+import { AnchorLink, ButtonLink } from '../components/links';
 import {
   Anchor,
   Badge,
@@ -14,8 +14,10 @@ import {
 import { useParams } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { useAsset, useProperty, useTasks } from '../api/queries';
+import { allows, hasRole, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
 import { DueBadge } from '../components/DueBadge';
+import { MarkDoneButton } from '../components/MarkDoneButton';
 import { ErrorNotice, PageLoader } from '../components/States';
 import { formatDate, formatMoney, humanize, safeHttpUrl } from '../format';
 import { terms } from '../terms';
@@ -43,6 +45,9 @@ export function DevicePage() {
   const d = device.data;
   const manual = safeHttpUrl(d.product?.manual_url);
   const currency = property.data?.default_currency ?? 'USD';
+  const role = membership ? toRole(membership.role) : undefined;
+  const canEdit = hasRole(role, 'maintainer') && allows(d.access, 'manage');
+  const canLog = hasRole(role, 'resident');
 
   return (
     <Stack>
@@ -50,19 +55,26 @@ export function DevicePage() {
         <AnchorLink to="/devices">{terms.devices}</AnchorLink>
         <Text>{d.name}</Text>
       </Breadcrumbs>
-      <Group gap="xs">
-        <Title order={2}>{d.name}</Title>
-        <Badge variant="light">{humanize(d.category)}</Badge>
-        {d.is_critical && (
-          <Badge color="orange" variant="light">
-            Critical
-          </Badge>
+      <Group justify="space-between" align="flex-start">
+        <Group gap="xs">
+          <Title order={2}>{d.name}</Title>
+          <Badge variant="light">{humanize(d.category)}</Badge>
+          {d.is_critical && (
+            <Badge color="orange" variant="light">
+              Critical
+            </Badge>
+          )}
+          {(d.tags ?? []).map((tag) => (
+            <Badge key={tag.id} variant="outline" color={tag.color ?? undefined}>
+              {tag.name}
+            </Badge>
+          ))}
+        </Group>
+        {canEdit && (
+          <ButtonLink to="/devices/$deviceId/edit" params={{ deviceId }} variant="default">
+            Edit
+          </ButtonLink>
         )}
-        {(d.tags ?? []).map((tag) => (
-          <Badge key={tag.id} variant="outline" color={tag.color ?? undefined}>
-            {tag.name}
-          </Badge>
-        ))}
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 2 }}>
@@ -148,7 +160,10 @@ export function DevicePage() {
               {tasks.data.items.map((task) => (
                 <Group key={task.id} justify="space-between" gap="xs">
                   <Text>{task.title}</Text>
-                  <DueBadge nextDue={task.next_due} leadDays={task.lead_days} />
+                  <Group gap="xs">
+                    <DueBadge nextDue={task.next_due} leadDays={task.lead_days} />
+                    {canLog && <MarkDoneButton task={task} currency={currency} />}
+                  </Group>
                 </Group>
               ))}
             </Stack>

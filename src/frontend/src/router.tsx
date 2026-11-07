@@ -8,6 +8,8 @@ import {
 import { AppLayout } from './components/AppLayout';
 import { NotFound } from './components/States';
 import { AreaPage } from './pages/AreaPage';
+import { BackupsPage } from './pages/BackupsPage';
+import { DeviceEditPage, DeviceNewPage } from './pages/DeviceFormPage';
 import { DevicePage } from './pages/DevicePage';
 import { DevicesPage } from './pages/DevicesPage';
 import { FloorPlanPage } from './pages/FloorPlanPage';
@@ -91,6 +93,24 @@ const searchRoute = createRoute({
   }),
 });
 
+const deviceNewRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/devices/new',
+  component: DeviceNewPage,
+});
+
+const deviceEditRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/devices/$deviceId/edit',
+  component: DeviceEditPage,
+});
+
+const backupsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/admin/backups',
+  component: BackupsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   setupRoute,
@@ -99,9 +119,12 @@ const routeTree = rootRoute.addChildren([
     areaRoute,
     floorRoute,
     devicesRoute,
+    deviceNewRoute,
     deviceRoute,
+    deviceEditRoute,
     haImportRoute,
     searchRoute,
+    backupsRoute,
   ]),
 ]);
 

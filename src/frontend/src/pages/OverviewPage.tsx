@@ -13,6 +13,7 @@ import type { Area, Building } from '../api/types';
 import { hasRole, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
 import { DueBadge } from '../components/DueBadge';
+import { MarkDoneButton } from '../components/MarkDoneButton';
 import { ErrorNotice, PageLoader } from '../components/States';
 import { humanize, isoDay } from '../format';
 import { terms } from '../terms';
@@ -77,7 +78,13 @@ function BuildingSection({ building, areas }: { building: Building; areas: Area[
   );
 }
 
-function DueSoon({ propertyId }: { propertyId: string }) {
+interface DueSoonProps {
+  propertyId: string;
+  currency: string;
+  canLog: boolean;
+}
+
+function DueSoon({ propertyId, currency, canLog }: DueSoonProps) {
   const tasks = useTasks(propertyId, { due_before: isoDay(DUE_WINDOW_DAYS), active: true });
   if (tasks.isPending) return <PageLoader />;
   if (tasks.isError) return <ErrorNotice error={tasks.error} />;
@@ -102,7 +109,10 @@ function DueSoon({ propertyId }: { propertyId: string }) {
               ) : (
                 <Text>{task.title}</Text>
               )}
-              <DueBadge nextDue={task.next_due} leadDays={task.lead_days} />
+              <Group gap="xs">
+                <DueBadge nextDue={task.next_due} leadDays={task.lead_days} />
+                {canLog && <MarkDoneButton task={task} currency={currency} />}
+              </Group>
             </Group>
           ))}
         </Stack>
@@ -161,7 +171,13 @@ export function OverviewPage() {
       </div>
       {hasRole(membership ? toRole(membership.role) : undefined, 'admin') &&
         allAreas.length === 0 && <SampleDataCard />}
-      {propertyId && <DueSoon propertyId={propertyId} />}
+      {propertyId && (
+        <DueSoon
+          propertyId={propertyId}
+          currency={property.data?.default_currency ?? 'USD'}
+          canLog={membership !== undefined && hasRole(toRole(membership.role), 'resident')}
+        />
+      )}
       {sortedBuildings.map((building) => (
         <BuildingSection key={building.id} building={building} areas={allAreas} />
       ))}

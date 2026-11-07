@@ -772,6 +772,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/backups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Backups
+         * @description Backups in the data folder's ``backups/``, newest first.
+         */
+        get: operations["list_backups_api_v1_backups_get"];
+        put?: never;
+        /**
+         * Make Backup
+         * @description Write a full backup now, the same as ``domus backup create``.
+         */
+        post: operations["make_backup_api_v1_backups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backups/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download Backup
+         * @description Download one backup archive.
+         */
+        get: operations["download_backup_api_v1_backups__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sample-data": {
         parameters: {
             query?: never;
@@ -1328,6 +1372,23 @@ export interface components {
             notes?: string | null;
             /** Tag Ids */
             tag_ids?: string[] | null;
+        };
+        /**
+         * BackupOut
+         * @description A ``.hiotbak`` file in the data folder's ``backups/``.
+         */
+        BackupOut: {
+            /** Name */
+            name: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Modified At
+             * Format: date-time
+             */
+            modified_at: string;
+            /** Missing Files */
+            missing_files?: number | null;
         };
         /** BuildingIn */
         BuildingIn: {
@@ -1982,6 +2043,13 @@ export interface components {
         Page_AreaOut_: {
             /** Items */
             items: components["schemas"]["AreaOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[BackupOut] */
+        Page_BackupOut_: {
+            /** Items */
+            items: components["schemas"]["BackupOut"][];
             /** Next Cursor */
             next_cursor?: string | null;
         };
@@ -4618,6 +4686,77 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_backups_api_v1_backups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_BackupOut_"];
+                };
+            };
+        };
+    };
+    make_backup_api_v1_backups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupOut"];
+                };
+            };
+        };
+    };
+    download_backup_api_v1_backups__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": unknown;
+                };
             };
             /** @description Validation Error */
             422: {

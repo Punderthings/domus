@@ -1,5 +1,12 @@
 // Mantine components wired to the router, so `to` and `params` are type-checked.
-import { Anchor, Card, type AnchorProps, type CardProps } from '@mantine/core';
+import {
+  Anchor,
+  Button,
+  Card,
+  type AnchorProps,
+  type ButtonProps,
+  type CardProps,
+} from '@mantine/core';
 import { createLink } from '@tanstack/react-router';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
@@ -13,5 +20,11 @@ const RouterCard = forwardRef<HTMLAnchorElement, CardProps & ComponentPropsWitho
 );
 RouterCard.displayName = 'RouterCard';
 
+const RouterButton = forwardRef<HTMLAnchorElement, ButtonProps & ComponentPropsWithoutRef<'a'>>(
+  (props, ref) => <Button ref={ref} component="a" {...props} />,
+);
+RouterButton.displayName = 'RouterButton';
+
 export const AnchorLink = createLink(RouterAnchor);
 export const CardLink = createLink(RouterCard);
+export const ButtonLink = createLink(RouterButton);

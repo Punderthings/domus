@@ -611,3 +611,16 @@ class PlacementOut(Entity):
     label: str | None
     shape: str
     access: AccessStr
+
+
+# --- Backups ----------------------------------------------------------------
+
+
+class BackupOut(BaseModel):
+    """A ``.hiotbak`` file in the data folder's ``backups/``."""
+
+    name: str
+    size_bytes: int
+    modified_at: datetime
+    # Only set when a backup was just made: files the database lists but the blob store lacks.
+    missing_files: int | None = None
