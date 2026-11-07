@@ -5,8 +5,8 @@ tsvector columns and a pg_trgm index. The SQL is copied here, not imported,
 so this migration keeps working when ``domus.services.search`` changes.
 The index starts empty; the app fills it on startup (``search.ensure_built``).
 
-Revision ID: 0002
-Revises: 0001
+Revision ID: 0003
+Revises: 0002
 Create Date: 2026-11-06
 """
 
@@ -14,8 +14,8 @@ from collections.abc import Sequence
 
 from alembic import op
 
-revision: str = "0002"
-down_revision: str | None = "0001"
+revision: str = "0003"
+down_revision: str | None = "0002"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

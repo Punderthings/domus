@@ -270,7 +270,7 @@ def _rows(docs: Iterable[SearchDoc]) -> list[dict[str, str]]:
 
 # SQLite: FTS5 ------------------------------------------------------------------
 
-SQLITE_TABLE = "search_fts"  # created by migration 0002
+SQLITE_TABLE = "search_fts"  # created by migration 0003
 _fts_meta = MetaData()
 _fts = Table(
     SQLITE_TABLE,
@@ -340,7 +340,7 @@ class SqliteSearchIndex:
 # PostgreSQL: tsvector + pg_trgm -----------------------------------------------
 
 PG_TABLE = "search_doc"
-# The tables are created by migration 0002. 'simple' does no stemming, which
+# The tables are created by migration 0003. 'simple' does no stemming, which
 # suits model numbers, serials, and names in any language.
 _pg_meta = MetaData()
 _doc = Table(

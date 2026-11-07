@@ -63,10 +63,17 @@ RoleStr = Annotated[str, OneOf([r.value for r in enums.Role])]
 LevelStr = Annotated[str, OneOf([lv.value for lv in enums.AccessLevel])]
 ScopeStr = Annotated[str, OneOf([s.value for s in enums.ScopeType])]
 SubjectStr = Annotated[str, OneOf([s.value for s in enums.SubjectType])]
+DocumentKind = Annotated[str, OneOf(enums.DOCUMENT_KINDS)]
+Sensitivity = Annotated[str, OneOf(enums.SENSITIVITIES)]
+CanvasKind = Annotated[str, OneOf(enums.CANVAS_KINDS)]
+CanvasScope = Annotated[str, OneOf(enums.CANVAS_SCOPES)]
 
 Name = Annotated[str, Field(min_length=1, max_length=200)]
 Currency = Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
 Money = Annotated[Decimal, Field(ge=0, max_digits=12, decimal_places=2)]
+# A pin position as a fraction of the image's width or height.
+Unit = Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+Label = Annotated[str, Field(min_length=1, max_length=200)]
 
 
 class Out(BaseModel):
@@ -528,3 +535,71 @@ class EventOut(EventGuestOut):
 class CompleteOut(BaseModel):
     event: EventOut
     task: TaskOut
+
+
+# --- Documents, canvases, and placements --------------------------------------
+
+
+class DocumentOut(Entity):
+    property_id: str
+    kind: str
+    title: str | None
+    original_filename: str | None
+    sensitivity: str
+    mime_type: str | None
+    size: int | None
+    content_url: str | None
+    access: AccessStr
+
+
+class CanvasIn(BaseModel):
+    property_id: str | None = None
+    document_id: str
+    scope_type: CanvasScope
+    scope_id: str
+    kind: CanvasKind
+    name: Label | None = None
+    scale_px_per_m: Annotated[float, Field(gt=0, allow_inf_nan=False)] | None = None
+
+
+class CanvasUpdate(BaseModel):
+    document_id: str | None = None
+    name: Label | None = None
+    scale_px_per_m: Annotated[float, Field(gt=0, allow_inf_nan=False)] | None = None
+
+
+class CanvasOut(Entity):
+    property_id: str
+    document_id: str
+    scope_type: str
+    scope_id: str
+    kind: str
+    name: str | None
+    scale_px_per_m: float | None
+    image_url: str
+    access: AccessStr
+
+
+class PlacementIn(BaseModel):
+    canvas_id: str
+    asset_id: str
+    x: Unit
+    y: Unit
+    label: Label | None = None
+
+
+class PlacementUpdate(BaseModel):
+    x: Unit | None = None
+    y: Unit | None = None
+    label: Label | None = None
+
+
+class PlacementOut(Entity):
+    canvas_id: str
+    asset_id: str
+    asset_name: str
+    x: float
+    y: float
+    label: str | None
+    shape: str
+    access: AccessStr

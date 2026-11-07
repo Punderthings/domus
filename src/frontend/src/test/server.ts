@@ -9,6 +9,14 @@ export interface RecordedCall {
   body: unknown;
 }
 
+function parseBody(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text; // an upload's raw bytes
+  }
+}
+
 type Handler = (call: RecordedCall) => { status?: number; body?: unknown } | undefined;
 
 export function json(status: number, body?: unknown): Response {
@@ -35,7 +43,7 @@ export function fakeApi(routes: Record<string, Handler>) {
       path: url.pathname.replace(/^\/api\/v1/, ''),
       search: url.searchParams,
       headers: Object.fromEntries(request.headers.entries()),
-      body: text ? JSON.parse(text) : undefined,
+      body: text ? parseBody(text) : undefined,
     };
     calls.push(call);
     const handler = routes[`${call.method} ${call.path}`];

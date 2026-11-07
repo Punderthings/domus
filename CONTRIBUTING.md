@@ -40,7 +40,7 @@ DOMUS_TEST_DATABASE_URL=postgresql+pg8000://domus:domus@localhost/domus uv run p
 ```
 
 The search index needs the `pg_trgm` extension, which ships with PostgreSQL;
-migration 0002 creates it.
+migration 0003 creates it.
 
 ## Dependencies
 

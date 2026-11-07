@@ -10,6 +10,7 @@ import { NotFound } from './components/States';
 import { AreaPage } from './pages/AreaPage';
 import { DevicePage } from './pages/DevicePage';
 import { DevicesPage } from './pages/DevicesPage';
+import { FloorPlanPage } from './pages/FloorPlanPage';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
 import { SearchPage } from './pages/SearchPage';
@@ -64,6 +65,12 @@ const deviceRoute = createRoute({
   component: DevicePage,
 });
 
+const floorRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/floors/$floorId',
+  component: FloorPlanPage,
+});
+
 export interface SearchPageSearch {
   q?: string;
 }
@@ -80,7 +87,14 @@ const searchRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   loginRoute,
   setupRoute,
-  appRoute.addChildren([overviewRoute, areaRoute, devicesRoute, deviceRoute, searchRoute]),
+  appRoute.addChildren([
+    overviewRoute,
+    areaRoute,
+    floorRoute,
+    devicesRoute,
+    deviceRoute,
+    searchRoute,
+  ]),
 ]);
 
 export function createAppRouter(history: RouterHistory) {
@@ -93,4 +107,4 @@ declare module '@tanstack/react-router' {
   }
 }
 
-export { areaRoute, deviceRoute, devicesRoute, searchRoute };
+export { areaRoute, deviceRoute, devicesRoute, floorRoute, searchRoute };

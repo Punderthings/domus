@@ -391,7 +391,7 @@ def test_migration_downgrade_and_upgrade(engine: Engine) -> None:
     cfg = alembic_config()
     with engine.begin() as conn:
         cfg.attributes["connection"] = conn
-        command.downgrade(cfg, "0001")
+        command.downgrade(cfg, "0002")
     table = "search_doc" if engine.dialect.name == "postgresql" else "search_fts"
     assert table not in inspect(engine).get_table_names()
     upgrade(engine)
