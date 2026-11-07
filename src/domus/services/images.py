@@ -14,8 +14,11 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from domus.services.blobstore import LocalFsBlobStore
 
-# Refuse decompression bombs: about a 10,000 x 10,000 image.
-MAX_PIXELS = 100_000_000
+# Refuse decompression bombs. One frame may have up to 50 megapixels (a
+# 8,660 x 5,770 photo), and all frames of an animation together the same,
+# so one decode holds at most about 200 MB of pixels in memory.
+MAX_PIXELS = 50_000_000
+MAX_FRAMES = 300
 
 FORMATS: dict[str, str] = {
     "image/jpeg": "JPEG",
@@ -49,9 +52,10 @@ def sanitize(staged: Path, store: LocalFsBlobStore, mime: str) -> tuple[Path, st
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             try:
                 with Image.open(staged, formats=[fmt]) as src:
-                    if src.width * src.height > MAX_PIXELS:
+                    n_frames = getattr(src, "n_frames", 1)
+                    if n_frames > MAX_FRAMES or src.width * src.height * n_frames > MAX_PIXELS:
                         raise BadImage("Image is too large to process")
-                    animated = fmt in ("GIF", "WEBP") and getattr(src, "n_frames", 1) > 1
+                    animated = fmt in ("GIF", "WEBP") and n_frames > 1
                     icc = src.info.get("icc_profile")
                     if animated:
                         frames = _frames(src)

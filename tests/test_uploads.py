@@ -163,3 +163,23 @@ def test_sanitize_rejects_decompression_bombs(
     staged.write_bytes(png(4, 4))
     with pytest.raises(images.BadImage):
         images.sanitize(staged, store, "image/png")
+
+
+def test_sanitize_counts_every_animation_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    from domus.services import images
+
+    frames = [Image.new("RGB", (4, 4), c) for c in [(255, 0, 0), (0, 255, 0), (0, 0, 255)]]
+    buf = BytesIO()
+    frames[0].save(buf, format="GIF", save_all=True, append_images=frames[1:])
+    monkeypatch.setattr(images, "MAX_PIXELS", 40)  # one frame fits, three do not
+    store = LocalFsBlobStore(tmp_path)
+    staged = store.new_staging_file()
+    staged.write_bytes(buf.getvalue())
+    with pytest.raises(images.BadImage):
+        images.sanitize(staged, store, "image/gif")
