@@ -1,7 +1,16 @@
 import { AnchorLink, CardLink } from '../components/links';
-import { Badge, Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
-import { useAreas, useBuildings, useFloors, useProperty, useTasks } from '../api/queries';
+import { Badge, Button, Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import {
+  useAreas,
+  useBuildings,
+  useFloors,
+  useLoadSampleData,
+  useProperty,
+  useSampleDataStatus,
+  useTasks,
+} from '../api/queries';
 import type { Area, Building } from '../api/types';
+import { hasRole, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
 import { DueBadge } from '../components/DueBadge';
 import { ErrorNotice, PageLoader } from '../components/States';
@@ -102,6 +111,31 @@ function DueSoon({ propertyId }: { propertyId: string }) {
   );
 }
 
+/** Offered to an Admin while the property is still empty: try Domus on the sample home. */
+function SampleDataCard() {
+  const status = useSampleDataStatus(true);
+  const load = useLoadSampleData();
+  if (!status.data?.available || status.data.loaded) return null;
+  return (
+    <Card withBorder>
+      <Title order={3} mb="xs">
+        Try Domus with sample data
+      </Title>
+      <Text mb="sm">
+        Add Sample Home, a small made-up house with rooms, {terms.devices.toLowerCase()}, and
+        maintenance tasks, as a separate property. Your own property stays as it is. Switch between
+        them from the account menu.
+      </Text>
+      {load.error && <ErrorNotice error={load.error} />}
+      <Group>
+        <Button onClick={() => load.mutate()} loading={load.isPending}>
+          Load sample data
+        </Button>
+      </Group>
+    </Card>
+  );
+}
+
 export function OverviewPage() {
   const membership = useActiveMembership();
   const propertyId = membership?.property_id;
@@ -125,6 +159,8 @@ export function OverviewPage() {
         <Title order={2}>{property.data?.name}</Title>
         {property.data?.address && <Text c="dimmed">{property.data.address}</Text>}
       </div>
+      {hasRole(membership ? toRole(membership.role) : undefined, 'admin') &&
+        allAreas.length === 0 && <SampleDataCard />}
       {propertyId && <DueSoon propertyId={propertyId} />}
       {sortedBuildings.map((building) => (
         <BuildingSection key={building.id} building={building} areas={allAreas} />

@@ -19,6 +19,7 @@ export interface Page<T> {
 export type CurrentUser = Schemas['MeOut'];
 export type Membership = Schemas['MembershipOut'];
 export type SetupStatus = Schemas['SetupStatus'];
+export type SampleDataStatus = Schemas['SampleDataStatus'];
 export type LoginInput = Schemas['LoginIn'];
 export type SetupInput = Schemas['SetupIn'];
 export type Property = Schemas['PropertyOut'];
@@ -43,3 +44,12 @@ export type CanvasKind = Schemas['CanvasIn']['kind'];
 export type Placement = Schemas['PlacementOut'];
 /** Search hits: devices and areas, best match first, hidden items left out. */
 export type SearchResults = Schemas['SearchOut'];
+
+/** Home Assistant import: what the server would do, and what it did. */
+export type HaPreview = Schemas['ImportPreview'];
+export type HaDevicePlan = Schemas['DevicePlan'];
+export type HaFloorPlan = Schemas['FloorPlan'];
+export type HaDeviceChoice = Schemas['DeviceChoice'];
+export type HaConnectInput = Schemas['HaConnectIn'];
+export type HaApplyInput = Schemas['HaApplyIn'];
+export type HaImportResult = Schemas['ImportResult'];

@@ -52,6 +52,20 @@ is an occasional MPL-2.0 build-time tool that is completely separate from applic
 code: a maintainer reviews it, and it is listed by name in `BUILD_ONLY` in
 `scripts/check_licenses.py` (or the front end's own license check).
 
+## Docs site
+
+The user docs in `docs/` are also built into a static site with
+[Zensical](https://zensical.org/) (MIT), configured in `mkdocs.yml`. It is in its own
+`docs` dependency group, so `uv sync` doesn't install it:
+
+```sh
+uv run --group docs zensical serve   # preview at http://127.0.0.1:8000, rebuilds on save
+uv run --group docs zensical build   # writes site/ (git-ignored)
+```
+
+Zensical needs `pathspec` (MPL-2.0), which is allowed as a build-only tool
+(decision 20). Add new pages to `nav` in `mkdocs.yml`.
+
 ## Security audit
 
 Maintainers check the locked dependencies for known vulnerabilities from time to time.

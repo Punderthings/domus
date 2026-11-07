@@ -67,7 +67,7 @@ def test_rejected(text: str) -> None:
 
 
 def test_generic_bsd_classifier_is_accepted() -> None:
-    """Decision 21: "BSD License" without a variant is accepted for any package."""
+    """Decision 23: "BSD License" without a variant is accepted for any package."""
     assert cl.is_allowed("BSD License")
     assert (
         cl.find_violations([{"Name": "pg8000", "Version": "1.31.6", "License": "BSD License"}])

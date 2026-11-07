@@ -224,3 +224,6 @@ src/domus/static/
 
 # Domus: local security audit reports (scripts/security_audit.py)
 /security-audit*.md
+
+# Domus: scratch data folder used in docs/install-local.md
+/.domus-test/

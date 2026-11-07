@@ -1,8 +1,17 @@
 // TanStack Query hooks for each API resource, so pages never build URLs themselves.
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { setActivePropertyId } from '../auth/activeProperty';
 import { ApiError, api, unwrap, uploadFile } from './client';
-import type { CanvasKind, Document, LoginInput, Placement, SetupInput } from './types';
+import type {
+  CanvasKind,
+  Document,
+  HaApplyInput,
+  HaConnectInput,
+  LoginInput,
+  Placement,
+  SetupInput,
+} from './types';
 
 export type { LoginInput, SetupInput };
 
@@ -12,7 +21,9 @@ const LIMIT = 200;
 export const keys = {
   me: ['auth', 'me'] as const,
   setup: ['auth', 'setup'] as const,
+  properties: ['properties'] as const,
   property: (id: string) => ['properties', id] as const,
+  sampleData: ['sample-data'] as const,
   buildings: (propertyId: string) => ['buildings', { propertyId }] as const,
   floors: (buildingId: string) => ['floors', { buildingId }] as const,
   areas: (propertyId: string) => ['areas', { propertyId }] as const,
@@ -79,6 +90,37 @@ export function useLogout() {
     onSettled: () => {
       client.clear();
       client.setQueryData(keys.me, null);
+    },
+  });
+}
+
+/** Every property the user is a member of (for the property switcher). */
+export function useProperties(enabled = true) {
+  return useQuery({
+    queryKey: keys.properties,
+    queryFn: ({ signal }) => unwrap(api.GET('/api/v1/properties', { signal })),
+    enabled,
+  });
+}
+
+/** Whether an Admin can load the sample home. Ask only as an Admin; others get 403. */
+export function useSampleDataStatus(enabled: boolean) {
+  return useQuery({
+    queryKey: keys.sampleData,
+    queryFn: ({ signal }) => unwrap(api.GET('/api/v1/sample-data', { signal })),
+    enabled,
+  });
+}
+
+/** Add the sample home as a new property, then switch to it. */
+export function useLoadSampleData() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => unwrap(api.POST('/api/v1/sample-data')),
+    onSuccess: async (status) => {
+      client.setQueryData(keys.sampleData, status);
+      if (status.property_id) setActivePropertyId(status.property_id);
+      await client.invalidateQueries();
     },
   });
 }
@@ -388,5 +430,28 @@ export function useRemovePin() {
         }),
       ),
     onSuccess: () => client.invalidateQueries({ queryKey: ['placements'] }),
+  });
+}
+
+/** Read Home Assistant's registries and show what an import would do. Changes nothing. */
+export function useHaPreview() {
+  return useMutation({
+    mutationFn: (body: HaConnectInput) =>
+      unwrap(api.POST('/api/v1/homeassistant/preview', { body })),
+  });
+}
+
+/** Apply a Home Assistant import, then refresh everything it may have added. */
+export function useHaApply() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: HaApplyInput) => unwrap(api.POST('/api/v1/homeassistant/apply', { body })),
+    onSuccess: async () => {
+      await Promise.all(
+        ['assets', 'areas', 'floors', 'buildings'].map((key) =>
+          client.invalidateQueries({ queryKey: [key] }),
+        ),
+      );
+    },
   });
 }

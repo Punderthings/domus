@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     backup_max_bytes: int = 2 * 1024**3
     # Largest single file upload (photos, floor plans, manuals).
     upload_max_bytes: int = 25 * 1024**2
+    # The sample home dataset that Admins can load from the web interface. Unset
+    # means examples/sample-home in a source checkout; the Docker image sets it.
+    sample_data_dir: Path | None = None
 
     @property
     def sqlite_path(self) -> Path:

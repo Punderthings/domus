@@ -45,6 +45,8 @@ domus restore examples/sample-home --merge --dry-run   # preview
 domus restore examples/sample-home --merge             # import
 ```
 
+An Admin can also load it from the web interface with **Load sample data** on the Overview of an empty property; it is added as its own property (see [docs/install-local.md](../../docs/install-local.md)).
+
 The import upserts by id, so running it again changes nothing. A test imports this dataset into a fresh database on every CI run and checks the row counts against `manifest.json`.
 
 When the data model changes, update this dataset in the same PR so it stays importable.
