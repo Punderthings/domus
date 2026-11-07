@@ -51,7 +51,6 @@ def test_allowed(text: str) -> None:
     [
         "",
         "UNKNOWN",
-        "BSD License",
         "LGPL-3.0-or-later",
         "GNU Lesser General Public License v3 (LGPLv3)",
         "GPL-2.0-only",
@@ -65,6 +64,15 @@ def test_allowed(text: str) -> None:
 )
 def test_rejected(text: str) -> None:
     assert not cl.is_allowed(text)
+
+
+def test_generic_bsd_classifier_is_accepted() -> None:
+    """Decision 21: "BSD License" without a variant is accepted for any package."""
+    assert cl.is_allowed("BSD License")
+    assert (
+        cl.find_violations([{"Name": "pg8000", "Version": "1.31.6", "License": "BSD License"}])
+        == []
+    )
 
 
 def test_find_violations_uses_overrides_and_skips_self() -> None:

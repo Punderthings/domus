@@ -48,12 +48,14 @@ ALLOWED: frozenset[str] = frozenset(
 )
 
 # Trove classifier names (and other free-text values) that map to exactly one
-# SPDX id. "BSD License" is deliberately absent: it does not say which BSD
-# variant, so such packages need a reviewed entry in OVERRIDES.
+# SPDX id. The generic "BSD License" classifier does not say which BSD variant;
+# Shane accepts it for every package (decision 21 in
+# docs/_prompts/01-decisions.md), so it maps to BSD-3-Clause.
 ALIASES: Mapping[str, str] = {
     "Apache License 2.0": "Apache-2.0",
     "Apache Software License": "Apache-2.0",
     "Apache License, Version 2.0": "Apache-2.0",
+    "BSD License": "BSD-3-Clause",
     "ISC License (ISCL)": "ISC",
     "MIT License": "MIT",
     "Mozilla Public License 2.0 (MPL 2.0)": "MPL-2.0",
@@ -65,7 +67,6 @@ ALIASES: Mapping[str, str] = {
 # maintainer confirmed from the package's own LICENSE file.
 OVERRIDES: Mapping[str, str] = {
     "nodeenv": "BSD-3-Clause",  # classifier says only "BSD License"
-    "pg8000": "BSD-3-Clause",  # classifier says only "BSD License"; LICENSE file is BSD-3
 }
 
 # Build-time tools completely separate from application code may
