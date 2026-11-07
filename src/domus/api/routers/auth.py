@@ -1,13 +1,12 @@
 """First-run setup, login, logout, current user, and personal access tokens."""
 
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
-from domus.api.deps import CurrentPrincipal, DbSession, active_memberships, get_settings
+from domus.api.deps import CurrentPrincipal, DbSession, SettingsDep, active_memberships
 from domus.api.schemas import (
     LoginIn,
     MembershipOut,
@@ -33,8 +32,6 @@ from domus.models import ApiToken, AuditLog, AuthSession, Building, Membership, 
 from domus.models.enums import Role
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
 def _start_session(response: Response, db: DbSession, user: User, settings: Settings) -> None:

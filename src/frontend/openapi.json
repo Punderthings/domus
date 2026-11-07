@@ -2337,6 +2337,851 @@
         }
       }
     },
+    "/api/v1/documents": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Upload Document",
+        "description": "Upload one file. JPEG, PNG, WebP, GIF, and PDF are accepted.",
+        "operationId": "upload_document_api_v1_documents_post",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "photo",
+                "label_photo",
+                "receipt",
+                "warranty",
+                "invoice",
+                "procedure",
+                "floor_plan",
+                "wall_photo",
+                "other"
+              ],
+              "default": "photo",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "property_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Property Id"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Title"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filename"
+            }
+          },
+          {
+            "name": "sensitivity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "guest",
+                "resident",
+                "admin"
+              ],
+              "default": "resident",
+              "title": "Sensitivity"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "The file itself as the raw request body.",
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/gif": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "application/pdf": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{document_id}": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Get Document Meta",
+        "operationId": "get_document_meta_api_v1_documents__document_id__get",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Delete Document",
+        "description": "Soft-delete a document. The blob stays until a later cleanup job finds it unused.",
+        "operationId": "delete_document_api_v1_documents__document_id__delete",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{document_id}/content": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Get Document Content",
+        "operationId": "get_document_content_api_v1_documents__document_id__content_get",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "image/jpeg": {},
+              "image/png": {},
+              "image/webp": {},
+              "image/gif": {},
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/canvases": {
+      "get": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "List Canvases",
+        "operationId": "list_canvases_api_v1_canvases_get",
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Property Id"
+            }
+          },
+          {
+            "name": "scope_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "property",
+                    "building",
+                    "floor",
+                    "area"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scope Type"
+            }
+          },
+          {
+            "name": "scope_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scope Id"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "floor_plan",
+                    "wall_photo",
+                    "panel_photo",
+                    "site_plan"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_CanvasOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Create Canvas",
+        "operationId": "create_canvas_api_v1_canvases_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CanvasIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvasOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/canvases/{canvas_id}": {
+      "get": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Get Canvas",
+        "operationId": "get_canvas_api_v1_canvases__canvas_id__get",
+        "parameters": [
+          {
+            "name": "canvas_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Canvas Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvasOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Update Canvas",
+        "description": "Rename a canvas or replace its image. Pins keep their 0-1 positions.",
+        "operationId": "update_canvas_api_v1_canvases__canvas_id__patch",
+        "parameters": [
+          {
+            "name": "canvas_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Canvas Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CanvasUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvasOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Delete Canvas",
+        "operationId": "delete_canvas_api_v1_canvases__canvas_id__delete",
+        "parameters": [
+          {
+            "name": "canvas_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Canvas Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/canvases/{canvas_id}/image": {
+      "get": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Get Canvas Image",
+        "description": "The canvas image. Anyone who can see the canvas can see its image.\n\n``v`` is ignored; ``image_url`` sets it to bust browser caches.",
+        "operationId": "get_canvas_image_api_v1_canvases__canvas_id__image_get",
+        "parameters": [
+          {
+            "name": "canvas_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Canvas Id"
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "V"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "image/jpeg": {},
+              "image/png": {},
+              "image/webp": {},
+              "image/gif": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/canvases/{canvas_id}/placements": {
+      "get": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "List Placements",
+        "description": "Every pin on a canvas whose device the caller can see (not paginated).",
+        "operationId": "list_placements_api_v1_canvases__canvas_id__placements_get",
+        "parameters": [
+          {
+            "name": "canvas_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Canvas Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_PlacementOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/placements": {
+      "get": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Placements For Asset",
+        "description": "Where one device is pinned, on canvases the caller can see.",
+        "operationId": "placements_for_asset_api_v1_placements_get",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_PlacementOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Create Placement",
+        "operationId": "create_placement_api_v1_placements_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlacementIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlacementOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/placements/{placement_id}": {
+      "patch": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Update Placement",
+        "operationId": "update_placement_api_v1_placements__placement_id__patch",
+        "parameters": [
+          {
+            "name": "placement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Placement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlacementUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlacementOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "canvases"
+        ],
+        "summary": "Delete Placement",
+        "operationId": "delete_placement_api_v1_placements__placement_id__delete",
+        "parameters": [
+          {
+            "name": "placement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Placement Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/properties/{property_id}/members": {
       "get": {
         "tags": [
@@ -2750,6 +3595,205 @@
         }
       }
     },
+    "/api/v1/sample-data": {
+      "get": {
+        "tags": [
+          "sample"
+        ],
+        "summary": "Sample Data Status",
+        "description": "Whether this install ships the sample home, and whether it is already loaded.",
+        "operationId": "sample_data_status_api_v1_sample_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDataStatus"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sample"
+        ],
+        "summary": "Load Sample Data",
+        "description": "Add the sample home as a new property, with the caller as its Admin.",
+        "operationId": "load_sample_data_api_v1_sample_data_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDataStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeassistant/preview": {
+      "post": {
+        "tags": [
+          "homeassistant"
+        ],
+        "summary": "Preview Import",
+        "description": "Read Home Assistant's registries and show what an import would do. Changes nothing.",
+        "operationId": "preview_import_api_v1_homeassistant_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaConnectIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeassistant/apply": {
+      "post": {
+        "tags": [
+          "homeassistant"
+        ],
+        "summary": "Apply Import",
+        "description": "Import in one transaction. Running it again with the same choices changes nothing.",
+        "operationId": "apply_import_api_v1_homeassistant_apply_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaApplyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Search",
+        "description": "Find devices and areas by name, notes, product, tags, place, or identifier.\n\nEvery word must match, as a word prefix (\"therm\" finds \"Thermostat\").\nGuests never match on identifiers such as serial numbers or MAC\naddresses, or on vendors, since guest responses leave those out.",
+        "operationId": "search_api_v1_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "title": "Q"
+            }
+          },
+          {
+            "name": "property_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Property Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/calendar.ics": {
       "get": {
         "tags": [
@@ -3127,6 +4171,73 @@
           "access"
         ],
         "title": "AreaOut"
+      },
+      "AreaPlan": {
+        "properties": {
+          "ha_area_id": {
+            "type": "string",
+            "title": "Ha Area Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "ha_floor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ha Floor Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "matched"
+            ],
+            "title": "Status"
+          },
+          "match_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ha_area_id",
+                  "name"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Reason"
+          },
+          "area_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_area_id",
+          "name",
+          "ha_floor_id",
+          "status",
+          "match_reason",
+          "area_id"
+        ],
+        "title": "AreaPlan"
       },
       "AreaUpdate": {
         "properties": {
@@ -4601,6 +5712,213 @@
         "type": "object",
         "title": "BuildingUpdate"
       },
+      "CanvasIn": {
+        "properties": {
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "scope_type": {
+            "type": "string",
+            "enum": [
+              "property",
+              "building",
+              "floor",
+              "area"
+            ],
+            "title": "Scope Type"
+          },
+          "scope_id": {
+            "type": "string",
+            "title": "Scope Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "floor_plan",
+              "wall_photo",
+              "panel_photo",
+              "site_plan"
+            ],
+            "title": "Kind"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "scale_px_per_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale Px Per M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "scope_type",
+          "scope_id",
+          "kind"
+        ],
+        "title": "CanvasIn"
+      },
+      "CanvasOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "scope_type": {
+            "type": "string",
+            "title": "Scope Type"
+          },
+          "scope_id": {
+            "type": "string",
+            "title": "Scope Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "scale_px_per_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale Px Per M"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "view",
+              "control",
+              "manage"
+            ],
+            "title": "Access"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "property_id",
+          "document_id",
+          "scope_type",
+          "scope_id",
+          "kind",
+          "name",
+          "scale_px_per_m",
+          "image_url",
+          "access"
+        ],
+        "title": "CanvasOut"
+      },
+      "CanvasUpdate": {
+        "properties": {
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "scale_px_per_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale Px Per M"
+          }
+        },
+        "type": "object",
+        "title": "CanvasUpdate"
+      },
       "CompleteIn": {
         "properties": {
           "performed_on": {
@@ -4679,6 +5997,366 @@
           "task"
         ],
         "title": "CompleteOut"
+      },
+      "DeviceChoice": {
+        "properties": {
+          "ha_device_id": {
+            "type": "string",
+            "title": "Ha Device Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "create",
+              "link",
+              "skip"
+            ],
+            "title": "Action"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_device_id",
+          "action"
+        ],
+        "title": "DeviceChoice"
+      },
+      "DevicePlan": {
+        "properties": {
+          "ha_device_id": {
+            "type": "string",
+            "title": "Ha Device Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "ha_area_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ha Area Id"
+          },
+          "area_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "matched",
+              "linked",
+              "changed",
+              "ignored"
+            ],
+            "title": "Status"
+          },
+          "match_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ha_device_id",
+                  "connection",
+                  "serial",
+                  "name"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Reason"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "asset_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Name"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "create",
+              "link",
+              "skip"
+            ],
+            "title": "Action"
+          },
+          "can_apply": {
+            "type": "boolean",
+            "title": "Can Apply"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/FieldChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          },
+          "new_identifiers": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierPlan"
+            },
+            "type": "array",
+            "title": "New Identifiers"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_device_id",
+          "name",
+          "manufacturer",
+          "model",
+          "ha_area_id",
+          "area_name",
+          "status",
+          "match_reason",
+          "asset_id",
+          "asset_name",
+          "action",
+          "can_apply",
+          "changes",
+          "new_identifiers",
+          "note"
+        ],
+        "title": "DevicePlan"
+      },
+      "DeviceResult": {
+        "properties": {
+          "ha_device_id": {
+            "type": "string",
+            "title": "Ha Device Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "unchanged",
+              "skipped"
+            ],
+            "title": "Outcome"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_device_id",
+          "name",
+          "outcome",
+          "asset_id",
+          "note"
+        ],
+        "title": "DeviceResult"
+      },
+      "DocumentOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "original_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Filename"
+          },
+          "sensitivity": {
+            "type": "string",
+            "title": "Sensitivity"
+          },
+          "mime_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mime Type"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "content_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Url"
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "view",
+              "control",
+              "manage"
+            ],
+            "title": "Access"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "property_id",
+          "kind",
+          "title",
+          "original_filename",
+          "sensitivity",
+          "mime_type",
+          "size",
+          "content_url",
+          "access"
+        ],
+        "title": "DocumentOut"
       },
       "EventGuestOut": {
         "properties": {
@@ -4872,6 +6550,43 @@
         ],
         "title": "EventOut"
       },
+      "FieldChange": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "old": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old"
+          },
+          "new": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "old",
+          "new"
+        ],
+        "title": "FieldChange"
+      },
       "FloorIn": {
         "properties": {
           "building_id": {
@@ -4970,6 +6685,62 @@
         ],
         "title": "FloorOut"
       },
+      "FloorPlan": {
+        "properties": {
+          "ha_floor_id": {
+            "type": "string",
+            "title": "Ha Floor Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "matched"
+            ],
+            "title": "Status"
+          },
+          "floor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Floor Id"
+          },
+          "building_id": {
+            "type": "string",
+            "title": "Building Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_floor_id",
+          "name",
+          "level",
+          "status",
+          "floor_id",
+          "building_id"
+        ],
+        "title": "FloorPlan"
+      },
       "FloorUpdate": {
         "properties": {
           "name": {
@@ -5023,6 +6794,106 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HaApplyIn": {
+        "properties": {
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          },
+          "base_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Base Url",
+            "examples": [
+              "http://homeassistant.local:8123"
+            ]
+          },
+          "token": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Token",
+            "writeOnly": true
+          },
+          "building_for_floor": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "maxProperties": 500,
+            "title": "Building For Floor"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceChoice"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "title": "Devices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url",
+          "token"
+        ],
+        "title": "HaApplyIn"
+      },
+      "HaConnectIn": {
+        "properties": {
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          },
+          "base_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Base Url",
+            "examples": [
+              "http://homeassistant.local:8123"
+            ]
+          },
+          "token": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Token",
+            "writeOnly": true
+          },
+          "building_for_floor": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "maxProperties": 500,
+            "title": "Building For Floor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url",
+          "token"
+        ],
+        "title": "HaConnectIn"
       },
       "IdentifierIn": {
         "properties": {
@@ -5090,6 +6961,103 @@
         ],
         "title": "IdentifierOut"
       },
+      "IdentifierPlan": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "value"
+        ],
+        "title": "IdentifierPlan"
+      },
+      "ImportPreview": {
+        "properties": {
+          "floors": {
+            "items": {
+              "$ref": "#/components/schemas/FloorPlan"
+            },
+            "type": "array",
+            "title": "Floors"
+          },
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/AreaPlan"
+            },
+            "type": "array",
+            "title": "Areas"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DevicePlan"
+            },
+            "type": "array",
+            "title": "Devices"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "floors",
+          "areas",
+          "devices",
+          "counts"
+        ],
+        "title": "ImportPreview"
+      },
+      "ImportResult": {
+        "properties": {
+          "floors_created": {
+            "type": "integer",
+            "title": "Floors Created"
+          },
+          "areas_created": {
+            "type": "integer",
+            "title": "Areas Created"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceResult"
+            },
+            "type": "array",
+            "title": "Devices"
+          },
+          "relations_created": {
+            "type": "integer",
+            "title": "Relations Created"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "floors_created",
+          "areas_created",
+          "devices",
+          "relations_created",
+          "counts"
+        ],
+        "title": "ImportResult"
+      },
       "LocationIn": {
         "properties": {
           "area_id": {
@@ -5123,7 +7091,8 @@
               "floor",
               "cabinet",
               "closet",
-              "exterior_wall"
+              "exterior_wall",
+              "unspecified"
             ],
             "title": "Kind",
             "default": "wall"
@@ -5282,7 +7251,8 @@
                   "floor",
                   "cabinet",
                   "closet",
-                  "exterior_wall"
+                  "exterior_wall",
+                  "unspecified"
                 ]
               },
               {
@@ -5651,6 +7621,33 @@
         ],
         "title": "Page[BuildingOut]"
       },
+      "Page_CanvasOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "Page[CanvasOut]"
+      },
       "Page_FloorOut_": {
         "properties": {
           "items": {
@@ -5731,6 +7728,33 @@
           "items"
         ],
         "title": "Page[MemberOut]"
+      },
+      "Page_PlacementOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlacementOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "Page[PlacementOut]"
       },
       "Page_PropertyOut_": {
         "properties": {
@@ -5880,6 +7904,173 @@
           "items"
         ],
         "title": "Page[Union[EventOut, EventGuestOut]]"
+      },
+      "PlacementIn": {
+        "properties": {
+          "canvas_id": {
+            "type": "string",
+            "title": "Canvas Id"
+          },
+          "asset_id": {
+            "type": "string",
+            "title": "Asset Id"
+          },
+          "x": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X"
+          },
+          "y": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "canvas_id",
+          "asset_id",
+          "x",
+          "y"
+        ],
+        "title": "PlacementIn"
+      },
+      "PlacementOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "canvas_id": {
+            "type": "string",
+            "title": "Canvas Id"
+          },
+          "asset_id": {
+            "type": "string",
+            "title": "Asset Id"
+          },
+          "asset_name": {
+            "type": "string",
+            "title": "Asset Name"
+          },
+          "x": {
+            "type": "number",
+            "title": "X"
+          },
+          "y": {
+            "type": "number",
+            "title": "Y"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "shape": {
+            "type": "string",
+            "title": "Shape"
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "view",
+              "control",
+              "manage"
+            ],
+            "title": "Access"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "canvas_id",
+          "asset_id",
+          "asset_name",
+          "x",
+          "y",
+          "label",
+          "shape",
+          "access"
+        ],
+        "title": "PlacementOut"
+      },
+      "PlacementUpdate": {
+        "properties": {
+          "x": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "title": "PlacementUpdate"
       },
       "ProductIn": {
         "properties": {
@@ -6180,6 +8371,74 @@
         },
         "type": "object",
         "title": "PropertyUpdate"
+      },
+      "SampleDataStatus": {
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "loaded": {
+            "type": "boolean",
+            "title": "Loaded"
+          },
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "available",
+          "loaded",
+          "property_id"
+        ],
+        "title": "SampleDataStatus",
+        "description": "Whether the sample home can be loaded from the web interface."
+      },
+      "SearchOut": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "assets": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetOut"
+                },
+                {
+                  "$ref": "#/components/schemas/AssetGuestOut"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Assets"
+          },
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/AreaOut"
+            },
+            "type": "array",
+            "title": "Areas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "assets",
+          "areas"
+        ],
+        "title": "SearchOut",
+        "description": "Best matches first, at most ``limit`` of each kind, hidden items left out."
       },
       "SetupIn": {
         "properties": {

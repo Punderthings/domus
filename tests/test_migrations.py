@@ -1,10 +1,12 @@
 from pathlib import Path
 
 from sqlalchemy import Engine, inspect, text
+from tests.conftest import requires_sqlite
 
 from domus.db import make_engine
 from domus.migrate import current_revision, head_revision, upgrade
 from domus.models import Base
+from domus.services.search import include_in_migrations
 
 
 def test_upgrade_creates_every_model_table(engine: Engine) -> None:
@@ -24,11 +26,15 @@ def test_migration_matches_models(engine: Engine) -> None:
     from alembic.runtime.migration import MigrationContext
 
     with engine.connect() as conn:
-        ctx = MigrationContext.configure(conn, opts={"compare_type": True})
+        ctx = MigrationContext.configure(
+            conn,
+            opts={"compare_type": True, "include_name": include_in_migrations},
+        )
         diff = compare_metadata(ctx, Base.metadata)
     assert diff == []
 
 
+@requires_sqlite
 def test_sqlite_pragmas(engine: Engine) -> None:
     with engine.connect() as conn:
         assert conn.execute(text("PRAGMA foreign_keys")).scalar() == 1

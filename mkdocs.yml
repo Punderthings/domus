@@ -1,0 +1,49 @@
+# Docs site config. Built with Zensical (MIT), which reads this MkDocs-style file:
+#
+#   uv run --group docs zensical serve    # preview at http://127.0.0.1:8000
+#   uv run --group docs zensical build    # writes site/
+site_name: Domus
+site_description: Holistic home helper for IoT and equipment inventory, maintenance, and Home Assistant.
+repo_url: https://github.com/punderthings/domus
+repo_name: punderthings/domus
+edit_uri: edit/main/docs/
+copyright: Copyright The Domus maintainers. Licensed under the Apache License 2.0.
+
+docs_dir: docs
+site_dir: site
+
+nav:
+  - Home: index.md
+  - Install locally: install-local.md
+  - Design history: _prompts/README.md
+
+theme:
+  name: material
+  # No Google Fonts: the site works offline and makes no third-party requests.
+  font: false
+  features:
+    - content.code.copy
+    - navigation.sections
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true

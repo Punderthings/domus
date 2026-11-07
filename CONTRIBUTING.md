@@ -27,6 +27,21 @@ uv run pip-licenses --from=mixed --format=json | uv run python scripts/check_lic
 
 Tests must not use the network; stub or mock every fetch.
 
+### Testing on PostgreSQL (experimental)
+
+SQLite is the default. To run the same suite against a local PostgreSQL 15+
+server, install the `postgres` extra (the pg8000 driver) and point
+`DOMUS_TEST_DATABASE_URL` at an account that may create databases. Each test
+creates its own database and drops it afterwards.
+
+```sh
+uv sync --extra postgres
+DOMUS_TEST_DATABASE_URL=postgresql+pg8000://domus:domus@localhost/domus uv run pytest
+```
+
+The search index needs the `pg_trgm` extension, which ships with PostgreSQL;
+migration 0003 creates it.
+
 ## Dependencies
 
 Every dependency, including build and test tools, must use a license on the
@@ -36,6 +51,20 @@ GitHub Actions workflow. The license check fails CI on anything else. The one ex
 is an occasional MPL-2.0 build-time tool that is completely separate from application
 code: a maintainer reviews it, and it is listed by name in `BUILD_ONLY` in
 `scripts/check_licenses.py` (or the front end's own license check).
+
+## Docs site
+
+The user docs in `docs/` are also built into a static site with
+[Zensical](https://zensical.org/) (MIT), configured in `mkdocs.yml`. It is in its own
+`docs` dependency group, so `uv sync` doesn't install it:
+
+```sh
+uv run --group docs zensical serve   # preview at http://127.0.0.1:8000, rebuilds on save
+uv run --group docs zensical build   # writes site/ (git-ignored)
+```
+
+Zensical needs `pathspec` (MPL-2.0), which is allowed as a build-only tool
+(decision 20). Add new pages to `nav` in `mkdocs.yml`.
 
 ## Security audit
 

@@ -35,6 +35,7 @@ from domus.api.schemas import (
 )
 from domus.models import Area, Asset, AssetIdentifier, AssetTag, Location, Product, Tag
 from domus.models.enums import UNIQUE_IDENTIFIER_KINDS, AccessLevel, Role
+from domus.services import search
 
 router = APIRouter(tags=["assets"])
 
@@ -159,6 +160,7 @@ def _check_refs(ctx: PropertyContext, asset_id: str | None, body: AssetIn | Asse
 
 def _set_tags(db: DbSession, asset_id: str, tag_ids: list[str]) -> None:
     db.execute(delete(AssetTag).where(AssetTag.asset_id == asset_id))
+    search.mark_dirty(db, search.ASSET, asset_id)
     db.add_all([AssetTag(asset_id=asset_id, tag_id=t) for t in dict.fromkeys(tag_ids)])
 
 

@@ -31,6 +31,11 @@ function signedIn(role: Parameters<typeof user>[0] = 'admin', device: AssetDetai
       body: page(call.search.get('q') === 'nothing' ? [] : [device]),
     }),
     [`GET /assets/${FRIDGE_ID}`]: () => ({ body: device }),
+    'GET /search': (call: RecordedCall) => {
+      const q = call.search.get('q') ?? '';
+      if (q === 'nothing') return { body: { query: q, assets: [], areas: [] } };
+      return { body: { query: q, assets: [device], areas: areas.slice(0, 1) } };
+    },
     'GET /maintenance/tasks': () => ({
       body: page([
         task({ id: 'smoke', title: 'Test smoke detector', next_due: '2026-11-01', asset_id: null }),
@@ -219,5 +224,54 @@ describe('devices', () => {
     signedIn();
     renderApp('/devices/does-not-exist');
     expect(await screen.findByRole('alert')).toHaveTextContent('This was not found');
+  });
+});
+
+describe('search', () => {
+  it('searches from the header and shows devices and areas', async () => {
+    const { calls } = signedIn();
+    const { history } = renderApp('/');
+    const box = await screen.findByRole('textbox', { name: 'Search everything' });
+    await userEvent.type(box, 'fridge{Enter}');
+    expect(await screen.findByRole('heading', { name: 'Search', level: 2 })).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/search');
+    expect(history.location.search).toContain('q=fridge');
+    const devices = await screen.findByRole('region', { name: 'Devices' });
+    expect(within(devices).getByRole('link', { name: 'Refrigerator' })).toBeInTheDocument();
+    const found = screen.getByRole('region', { name: 'Areas' });
+    expect(within(found).getByRole('link', { name: 'Kitchen' })).toHaveAttribute(
+      'href',
+      `/areas/${KITCHEN_ID}`,
+    );
+    const call = calls.find((c) => c.path === '/search');
+    expect(call?.search.get('q')).toBe('fridge');
+    expect(call?.search.get('property_id')).toBe(property.id);
+  });
+
+  it('ignores an empty header search', async () => {
+    const { calls } = signedIn();
+    const { history } = renderApp('/');
+    const box = await screen.findByRole('textbox', { name: 'Search everything' });
+    await userEvent.type(box, '   {Enter}');
+    expect(history.location.pathname).toBe('/');
+    expect(calls.some((c) => c.path === '/search')).toBe(false);
+  });
+
+  it('says when nothing matches, and keeps the query in the URL', async () => {
+    signedIn();
+    const { history } = renderApp('/search?q=fridge');
+    await screen.findByRole('link', { name: 'Refrigerator' });
+    const box = screen.getByRole('textbox', { name: 'Search everything' });
+    await userEvent.clear(box);
+    await userEvent.type(box, 'nothing');
+    expect(await screen.findByText('Nothing matches “nothing”.')).toBeInTheDocument();
+    expect(history.location.search).toContain('q=nothing');
+  });
+
+  it('asks for a word before searching', async () => {
+    const { calls } = signedIn();
+    renderApp('/search');
+    expect(await screen.findByText('Type a word, or the start of one.')).toBeInTheDocument();
+    expect(calls.some((c) => c.path === '/search')).toBe(false);
   });
 });

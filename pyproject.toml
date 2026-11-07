@@ -18,13 +18,20 @@ dependencies = [
     "argon2-cffi>=23.1",
     "fastapi>=0.115",
     "icalendar>=6.0",
+    "pillow>=13.0",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
     "python-dateutil>=2.9",
     "sqlalchemy>=2.0.36",
     "typer>=0.12",
     "uvicorn>=0.30",
+    "websockets>=15",
 ]
+
+[project.optional-dependencies]
+# Experimental PostgreSQL support (decision 2). pg8000 is pure Python and
+# BSD-3-Clause; 1.31.5 fixes CVE-2025-61385.
+postgres = ["pg8000>=1.31.5"]
 
 [project.scripts]
 domus = "domus.cli:main"
@@ -40,6 +47,9 @@ dev = [
     "pyright>=1.1.408",
     "pytest>=8.4",
     "ruff>=0.14",
+]
+docs = [
+    "zensical>=0.1",
 ]
 
 [build-system]

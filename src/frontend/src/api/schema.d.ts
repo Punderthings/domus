@@ -519,6 +519,185 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Document
+         * @description Upload one file. JPEG, PNG, WebP, GIF, and PDF are accepted.
+         */
+        post: operations["upload_document_api_v1_documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document Meta */
+        get: operations["get_document_meta_api_v1_documents__document_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Document
+         * @description Soft-delete a document. The blob stays until a later cleanup job finds it unused.
+         */
+        delete: operations["delete_document_api_v1_documents__document_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{document_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document Content */
+        get: operations["get_document_content_api_v1_documents__document_id__content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/canvases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Canvases */
+        get: operations["list_canvases_api_v1_canvases_get"];
+        put?: never;
+        /** Create Canvas */
+        post: operations["create_canvas_api_v1_canvases_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/canvases/{canvas_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Canvas */
+        get: operations["get_canvas_api_v1_canvases__canvas_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Canvas */
+        delete: operations["delete_canvas_api_v1_canvases__canvas_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Canvas
+         * @description Rename a canvas or replace its image. Pins keep their 0-1 positions.
+         */
+        patch: operations["update_canvas_api_v1_canvases__canvas_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/canvases/{canvas_id}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Canvas Image
+         * @description The canvas image. Anyone who can see the canvas can see its image.
+         *
+         *     ``v`` is ignored; ``image_url`` sets it to bust browser caches.
+         */
+        get: operations["get_canvas_image_api_v1_canvases__canvas_id__image_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/canvases/{canvas_id}/placements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Placements
+         * @description Every pin on a canvas whose device the caller can see (not paginated).
+         */
+        get: operations["list_placements_api_v1_canvases__canvas_id__placements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/placements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Placements For Asset
+         * @description Where one device is pinned, on canvases the caller can see.
+         */
+        get: operations["placements_for_asset_api_v1_placements_get"];
+        put?: never;
+        /** Create Placement */
+        post: operations["create_placement_api_v1_placements_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/placements/{placement_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Placement */
+        delete: operations["delete_placement_api_v1_placements__placement_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Placement */
+        patch: operations["update_placement_api_v1_placements__placement_id__patch"];
+        trace?: never;
+    };
     "/api/v1/properties/{property_id}/members": {
         parameters: {
             query?: never;
@@ -629,6 +808,94 @@ export interface paths {
          * @description Download one backup archive.
          */
         get: operations["download_backup_api_v1_backups__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sample-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sample Data Status
+         * @description Whether this install ships the sample home, and whether it is already loaded.
+         */
+        get: operations["sample_data_status_api_v1_sample_data_get"];
+        put?: never;
+        /**
+         * Load Sample Data
+         * @description Add the sample home as a new property, with the caller as its Admin.
+         */
+        post: operations["load_sample_data_api_v1_sample_data_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/homeassistant/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Import
+         * @description Read Home Assistant's registries and show what an import would do. Changes nothing.
+         */
+        post: operations["preview_import_api_v1_homeassistant_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/homeassistant/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply Import
+         * @description Import in one transaction. Running it again with the same choices changes nothing.
+         */
+        post: operations["apply_import_api_v1_homeassistant_apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search
+         * @description Find devices and areas by name, notes, product, tags, place, or identifier.
+         *
+         *     Every word must match, as a word prefix ("therm" finds "Thermostat").
+         *     Guests never match on identifiers such as serial numbers or MAC
+         *     addresses, or on vendors, since guest responses leave those out.
+         */
+        get: operations["search_api_v1_search_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -779,6 +1046,24 @@ export interface components {
              * @enum {string}
              */
             access: "view" | "control" | "manage";
+        };
+        /** AreaPlan */
+        AreaPlan: {
+            /** Ha Area Id */
+            ha_area_id: string;
+            /** Name */
+            name: string;
+            /** Ha Floor Id */
+            ha_floor_id: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "matched";
+            /** Match Reason */
+            match_reason: ("ha_area_id" | "name") | null;
+            /** Area Id */
+            area_id: string | null;
         };
         /** AreaUpdate */
         AreaUpdate: {
@@ -1170,6 +1455,74 @@ export interface components {
             /** Notes */
             notes?: string | null;
         };
+        /** CanvasIn */
+        CanvasIn: {
+            /** Property Id */
+            property_id?: string | null;
+            /** Document Id */
+            document_id: string;
+            /**
+             * Scope Type
+             * @enum {string}
+             */
+            scope_type: "property" | "building" | "floor" | "area";
+            /** Scope Id */
+            scope_id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "floor_plan" | "wall_photo" | "panel_photo" | "site_plan";
+            /** Name */
+            name?: string | null;
+            /** Scale Px Per M */
+            scale_px_per_m?: number | null;
+        };
+        /** CanvasOut */
+        CanvasOut: {
+            /** Id */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Property Id */
+            property_id: string;
+            /** Document Id */
+            document_id: string;
+            /** Scope Type */
+            scope_type: string;
+            /** Scope Id */
+            scope_id: string;
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string | null;
+            /** Scale Px Per M */
+            scale_px_per_m: number | null;
+            /** Image Url */
+            image_url: string;
+            /**
+             * Access
+             * @enum {string}
+             */
+            access: "view" | "control" | "manage";
+        };
+        /** CanvasUpdate */
+        CanvasUpdate: {
+            /** Document Id */
+            document_id?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Scale Px Per M */
+            scale_px_per_m?: number | null;
+        };
         /** CompleteIn */
         CompleteIn: {
             /**
@@ -1194,6 +1547,109 @@ export interface components {
         CompleteOut: {
             event: components["schemas"]["EventOut"];
             task: components["schemas"]["TaskOut"];
+        };
+        /** DeviceChoice */
+        DeviceChoice: {
+            /** Ha Device Id */
+            ha_device_id: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "create" | "link" | "skip";
+            /** Asset Id */
+            asset_id?: string | null;
+        };
+        /** DevicePlan */
+        DevicePlan: {
+            /** Ha Device Id */
+            ha_device_id: string;
+            /** Name */
+            name: string;
+            /** Manufacturer */
+            manufacturer: string | null;
+            /** Model */
+            model: string | null;
+            /** Ha Area Id */
+            ha_area_id: string | null;
+            /** Area Name */
+            area_name: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "matched" | "linked" | "changed" | "ignored";
+            /** Match Reason */
+            match_reason: ("ha_device_id" | "connection" | "serial" | "name") | null;
+            /** Asset Id */
+            asset_id: string | null;
+            /** Asset Name */
+            asset_name: string | null;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "create" | "link" | "skip";
+            /** Can Apply */
+            can_apply: boolean;
+            /** Changes */
+            changes: components["schemas"]["FieldChange"][];
+            /** New Identifiers */
+            new_identifiers: components["schemas"]["IdentifierPlan"][];
+            /** Note */
+            note: string | null;
+        };
+        /** DeviceResult */
+        DeviceResult: {
+            /** Ha Device Id */
+            ha_device_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "created" | "updated" | "unchanged" | "skipped";
+            /** Asset Id */
+            asset_id: string | null;
+            /** Note */
+            note: string | null;
+        };
+        /** DocumentOut */
+        DocumentOut: {
+            /** Id */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Property Id */
+            property_id: string;
+            /** Kind */
+            kind: string;
+            /** Title */
+            title: string | null;
+            /** Original Filename */
+            original_filename: string | null;
+            /** Sensitivity */
+            sensitivity: string;
+            /** Mime Type */
+            mime_type: string | null;
+            /** Size */
+            size: number | null;
+            /** Content Url */
+            content_url: string | null;
+            /**
+             * Access
+             * @enum {string}
+             */
+            access: "view" | "control" | "manage";
         };
         /** EventGuestOut */
         EventGuestOut: {
@@ -1259,6 +1715,15 @@ export interface components {
             /** Notes */
             notes: string | null;
         };
+        /** FieldChange */
+        FieldChange: {
+            /** Field */
+            field: string;
+            /** Old */
+            old: string | null;
+            /** New */
+            new: string | null;
+        };
         /** FloorIn */
         FloorIn: {
             /** Building Id */
@@ -1301,6 +1766,24 @@ export interface components {
              */
             access: "view" | "control" | "manage";
         };
+        /** FloorPlan */
+        FloorPlan: {
+            /** Ha Floor Id */
+            ha_floor_id: string;
+            /** Name */
+            name: string;
+            /** Level */
+            level: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "matched";
+            /** Floor Id */
+            floor_id: string | null;
+            /** Building Id */
+            building_id: string;
+        };
         /** FloorUpdate */
         FloorUpdate: {
             /** Name */
@@ -1314,6 +1797,46 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HaApplyIn */
+        HaApplyIn: {
+            /** Property Id */
+            property_id?: string | null;
+            /**
+             * Base Url
+             * @example http://homeassistant.local:8123
+             */
+            base_url: string;
+            /**
+             * Token
+             * Format: password
+             */
+            token: string;
+            /** Building For Floor */
+            building_for_floor?: {
+                [key: string]: string;
+            };
+            /** Devices */
+            devices?: components["schemas"]["DeviceChoice"][];
+        };
+        /** HaConnectIn */
+        HaConnectIn: {
+            /** Property Id */
+            property_id?: string | null;
+            /**
+             * Base Url
+             * @example http://homeassistant.local:8123
+             */
+            base_url: string;
+            /**
+             * Token
+             * Format: password
+             */
+            token: string;
+            /** Building For Floor */
+            building_for_floor?: {
+                [key: string]: string;
+            };
         };
         /** IdentifierIn */
         IdentifierIn: {
@@ -1341,6 +1864,41 @@ export interface components {
             /** Source */
             source: string;
         };
+        /** IdentifierPlan */
+        IdentifierPlan: {
+            /** Kind */
+            kind: string;
+            /** Value */
+            value: string;
+        };
+        /** ImportPreview */
+        ImportPreview: {
+            /** Floors */
+            floors: components["schemas"]["FloorPlan"][];
+            /** Areas */
+            areas: components["schemas"]["AreaPlan"][];
+            /** Devices */
+            devices: components["schemas"]["DevicePlan"][];
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        /** ImportResult */
+        ImportResult: {
+            /** Floors Created */
+            floors_created: number;
+            /** Areas Created */
+            areas_created: number;
+            /** Devices */
+            devices: components["schemas"]["DeviceResult"][];
+            /** Relations Created */
+            relations_created: number;
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+        };
         /** LocationIn */
         LocationIn: {
             /** Area Id */
@@ -1354,7 +1912,7 @@ export interface components {
              * @default wall
              * @enum {string}
              */
-            kind: "wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall";
+            kind: "wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall" | "unspecified";
             /** Orientation */
             orientation?: string | null;
             /** Position Note */
@@ -1399,7 +1957,7 @@ export interface components {
             /** Name */
             name?: string | null;
             /** Kind */
-            kind?: ("wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall") | null;
+            kind?: ("wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall" | "unspecified") | null;
             /** Orientation */
             orientation?: string | null;
             /** Position Note */
@@ -1502,6 +2060,13 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /** Page[CanvasOut] */
+        Page_CanvasOut_: {
+            /** Items */
+            items: components["schemas"]["CanvasOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
         /** Page[FloorOut] */
         Page_FloorOut_: {
             /** Items */
@@ -1520,6 +2085,13 @@ export interface components {
         Page_MemberOut_: {
             /** Items */
             items: components["schemas"]["MemberOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[PlacementOut] */
+        Page_PlacementOut_: {
+            /** Items */
+            items: components["schemas"]["PlacementOut"][];
             /** Next Cursor */
             next_cursor?: string | null;
         };
@@ -1557,6 +2129,62 @@ export interface components {
             items: (components["schemas"]["EventOut"] | components["schemas"]["EventGuestOut"])[];
             /** Next Cursor */
             next_cursor?: string | null;
+        };
+        /** PlacementIn */
+        PlacementIn: {
+            /** Canvas Id */
+            canvas_id: string;
+            /** Asset Id */
+            asset_id: string;
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+            /** Label */
+            label?: string | null;
+        };
+        /** PlacementOut */
+        PlacementOut: {
+            /** Id */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Canvas Id */
+            canvas_id: string;
+            /** Asset Id */
+            asset_id: string;
+            /** Asset Name */
+            asset_name: string;
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+            /** Label */
+            label: string | null;
+            /** Shape */
+            shape: string;
+            /**
+             * Access
+             * @enum {string}
+             */
+            access: "view" | "control" | "manage";
+        };
+        /** PlacementUpdate */
+        PlacementUpdate: {
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
+            /** Label */
+            label?: string | null;
         };
         /** ProductIn */
         ProductIn: {
@@ -1638,6 +2266,30 @@ export interface components {
             timezone?: string | null;
             /** Default Currency */
             default_currency?: string | null;
+        };
+        /**
+         * SampleDataStatus
+         * @description Whether the sample home can be loaded from the web interface.
+         */
+        SampleDataStatus: {
+            /** Available */
+            available: boolean;
+            /** Loaded */
+            loaded: boolean;
+            /** Property Id */
+            property_id: string | null;
+        };
+        /**
+         * SearchOut
+         * @description Best matches first, at most ``limit`` of each kind, hidden items left out.
+         */
+        SearchOut: {
+            /** Query */
+            query: string;
+            /** Assets */
+            assets: (components["schemas"]["AssetOut"] | components["schemas"]["AssetGuestOut"])[];
+            /** Areas */
+            areas: components["schemas"]["AreaOut"][];
         };
         /** SetupIn */
         SetupIn: {
@@ -3320,6 +3972,504 @@ export interface operations {
             };
         };
     };
+    upload_document_api_v1_documents_post: {
+        parameters: {
+            query?: {
+                kind?: "manual" | "photo" | "label_photo" | "receipt" | "warranty" | "invoice" | "procedure" | "floor_plan" | "wall_photo" | "other";
+                property_id?: string | null;
+                title?: string | null;
+                filename?: string | null;
+                sensitivity?: "guest" | "resident" | "admin";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The file itself as the raw request body. */
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+                "image/gif": string;
+                "application/pdf": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_meta_api_v1_documents__document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_document_api_v1_documents__document_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_content_api_v1_documents__document_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
+                    "image/webp": unknown;
+                    "image/gif": unknown;
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_canvases_api_v1_canvases_get: {
+        parameters: {
+            query?: {
+                property_id?: string | null;
+                scope_type?: ("property" | "building" | "floor" | "area") | null;
+                scope_id?: string | null;
+                kind?: ("floor_plan" | "wall_photo" | "panel_photo" | "site_plan") | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_CanvasOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_canvas_api_v1_canvases_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CanvasIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CanvasOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_canvas_api_v1_canvases__canvas_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                canvas_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CanvasOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_canvas_api_v1_canvases__canvas_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                canvas_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_canvas_api_v1_canvases__canvas_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                canvas_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CanvasUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CanvasOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_canvas_image_api_v1_canvases__canvas_id__image_get: {
+        parameters: {
+            query?: {
+                v?: string | null;
+            };
+            header?: never;
+            path: {
+                canvas_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
+                    "image/webp": unknown;
+                    "image/gif": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_placements_api_v1_canvases__canvas_id__placements_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                canvas_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_PlacementOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    placements_for_asset_api_v1_placements_get: {
+        parameters: {
+            query: {
+                asset_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_PlacementOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_placement_api_v1_placements_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlacementIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlacementOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_placement_api_v1_placements__placement_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                placement_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_placement_api_v1_placements__placement_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                placement_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlacementUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlacementOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_members_api_v1_properties__property_id__members_get: {
         parameters: {
             query?: never;
@@ -3606,6 +4756,145 @@ export interface operations {
                 };
                 content: {
                     "application/zip": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_data_status_api_v1_sample_data_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleDataStatus"];
+                };
+            };
+        };
+    };
+    load_sample_data_api_v1_sample_data_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleDataStatus"];
+                };
+            };
+        };
+    };
+    preview_import_api_v1_homeassistant_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HaConnectIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_import_api_v1_homeassistant_apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HaApplyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_api_v1_search_get: {
+        parameters: {
+            query: {
+                q: string;
+                property_id?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOut"];
                 };
             };
             /** @description Validation Error */

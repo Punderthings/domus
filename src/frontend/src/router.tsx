@@ -12,8 +12,11 @@ import { BackupsPage } from './pages/BackupsPage';
 import { DeviceEditPage, DeviceNewPage } from './pages/DeviceFormPage';
 import { DevicePage } from './pages/DevicePage';
 import { DevicesPage } from './pages/DevicesPage';
+import { FloorPlanPage } from './pages/FloorPlanPage';
+import { HaImportPage } from './pages/HaImportPage';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
+import { SearchPage } from './pages/SearchPage';
 import { SetupPage } from './pages/SetupPage';
 
 const rootRoute = createRootRoute({ component: Outlet, notFoundComponent: NotFound });
@@ -65,6 +68,31 @@ const deviceRoute = createRoute({
   component: DevicePage,
 });
 
+const floorRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/floors/$floorId',
+  component: FloorPlanPage,
+});
+
+const haImportRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/import/home-assistant',
+  component: HaImportPage,
+});
+
+export interface SearchPageSearch {
+  q?: string;
+}
+
+const searchRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/search',
+  component: SearchPage,
+  validateSearch: (search: Record<string, unknown>): SearchPageSearch => ({
+    q: typeof search.q === 'string' && search.q ? search.q : undefined,
+  }),
+});
+
 const deviceNewRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/devices/new',
@@ -89,10 +117,13 @@ const routeTree = rootRoute.addChildren([
   appRoute.addChildren([
     overviewRoute,
     areaRoute,
+    floorRoute,
     devicesRoute,
     deviceNewRoute,
     deviceRoute,
     deviceEditRoute,
+    haImportRoute,
+    searchRoute,
     backupsRoute,
   ]),
 ]);
@@ -107,4 +138,4 @@ declare module '@tanstack/react-router' {
   }
 }
 
-export { areaRoute, deviceRoute, devicesRoute };
+export { areaRoute, deviceRoute, devicesRoute, floorRoute, searchRoute };

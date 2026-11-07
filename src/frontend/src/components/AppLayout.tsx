@@ -7,24 +7,59 @@ import {
   Menu,
   NavLink,
   Text,
+  TextInput,
   Title,
   Tooltip,
   useComputedColorScheme,
   useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Link, Navigate, Outlet, useRouterState } from '@tanstack/react-router';
-import { useCurrentUser, useLogout, useProperty, useSetupStatus } from '../api/queries';
+import { Link, Navigate, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
+import { useState, type FormEvent } from 'react';
+import {
+  useCurrentUser,
+  useLogout,
+  useProperties,
+  useProperty,
+  useSetupStatus,
+} from '../api/queries';
+import type { Property } from '../api/types';
 import { ROLE_LABELS, hasRole, toRole } from '../auth/permissions';
-import { useActiveMembership } from '../auth/useActiveProperty';
+import { setActivePropertyId, useActiveMembership } from '../auth/useActiveProperty';
 import { terms } from '../terms';
 import { ErrorNotice, PageLoader } from './States';
 
 const NAV = [
-  { to: '/', label: 'Overview', exact: true, adminOnly: false },
-  { to: '/devices', label: terms.devices, exact: false, adminOnly: false },
-  { to: '/admin/backups', label: 'Backups', exact: false, adminOnly: true },
+  { to: '/', label: 'Overview', exact: true, minRole: 'guest' },
+  { to: '/devices', label: terms.devices, exact: false, minRole: 'guest' },
+  { to: '/search', label: 'Search', exact: true, minRole: 'guest' },
+  { to: '/import/home-assistant', label: 'Import from HA', exact: false, minRole: 'maintainer' },
+  { to: '/admin/backups', label: 'Backups', exact: false, minRole: 'admin' },
 ] as const;
+
+/** The header search box; Enter opens the search page with the results. */
+function HeaderSearch() {
+  const navigate = useNavigate();
+  const [text, setText] = useState('');
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const q = text.trim();
+    if (!q) return;
+    setText('');
+    void navigate({ to: '/search', search: { q } });
+  };
+  return (
+    <form role="search" onSubmit={submit}>
+      <TextInput
+        aria-label="Search everything"
+        placeholder="Search"
+        value={text}
+        onChange={(event) => setText(event.currentTarget.value)}
+        w={{ base: 140, sm: 240 }}
+      />
+    </form>
+  );
+}
 
 function ColorSchemeToggle() {
   const { setColorScheme } = useMantineColorScheme();
@@ -44,12 +79,42 @@ function ColorSchemeToggle() {
   );
 }
 
+/** Menu items to switch property, shown only to members of more than one. */
+function PropertySwitcher({
+  properties,
+  activeId,
+}: {
+  properties: Property[];
+  activeId: string | undefined;
+}) {
+  if (properties.length < 2) return null;
+  return (
+    <>
+      <Menu.Divider />
+      <Menu.Label>Property</Menu.Label>
+      {properties.map((p) => (
+        <Menu.Item
+          key={p.id}
+          aria-current={p.id === activeId ? 'true' : undefined}
+          fw={p.id === activeId ? 600 : undefined}
+          onClick={() => setActivePropertyId(p.id)}
+        >
+          {p.name}
+        </Menu.Item>
+      ))}
+      <Menu.Divider />
+    </>
+  );
+}
+
 export function AppLayout() {
   const [opened, { toggle, close }] = useDisclosure();
   const user = useCurrentUser();
   const setup = useSetupStatus();
   const membership = useActiveMembership();
   const property = useProperty(membership?.property_id);
+  // Loaded up front, so the account menu has the names when it opens.
+  const properties = useProperties((user.data?.memberships.length ?? 0) > 1);
   const logout = useLogout();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
@@ -76,6 +141,7 @@ export function AppLayout() {
             )}
           </Group>
           <Group gap="xs" wrap="nowrap">
+            {membership && pathname !== '/search' && <HeaderSearch />}
             <ColorSchemeToggle />
             <Menu position="bottom-end">
               <Menu.Target>
@@ -92,6 +158,10 @@ export function AppLayout() {
                     </Badge>
                   )}
                 </Menu.Label>
+                <PropertySwitcher
+                  properties={properties.data?.items ?? []}
+                  activeId={membership?.property_id}
+                />
                 <Menu.Item onClick={() => logout.mutate()}>Sign out</Menu.Item>
               </Menu.Dropdown>
             </Menu>
@@ -100,8 +170,8 @@ export function AppLayout() {
       </AppShell.Header>
 
       <AppShell.Navbar p="xs" aria-label="Main">
-        {NAV.filter(
-          (item) => !item.adminOnly || (membership && hasRole(toRole(membership.role), 'admin')),
+        {NAV.filter((item) =>
+          hasRole(membership ? toRole(membership.role) : undefined, item.minRole),
         ).map((item) => {
           const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
           return (

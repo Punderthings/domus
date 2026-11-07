@@ -236,7 +236,8 @@ def test_missing_parent_row_fails_cleanly(
 ) -> None:
     src = _copy_sample(sample_home, tmp_path / "src")
     (src / "data" / "property.jsonl").unlink()
-    with pytest.raises(ImportDataError, match="FOREIGN KEY"):
+    # SQLite says "FOREIGN KEY constraint failed", Postgres "violates foreign key constraint".
+    with pytest.raises(ImportDataError, match=r"(?i)foreign key"):
         _import_dir(engine, src)
     assert sum(_counts(engine).values()) == 0
 

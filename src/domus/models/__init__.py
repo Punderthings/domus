@@ -2,6 +2,7 @@
 
 from domus.models.assets import Asset, AssetIdentifier, AssetRelation, AssetTag, Product, Tag
 from domus.models.base import Base
+from domus.models.canvas import Canvas, Placement
 from domus.models.documents import Attachment, Blob, Document
 from domus.models.maintenance import MaintenanceEvent, MaintenanceTask
 from domus.models.space import Area, Building, Floor, Location, Property, SpatialRelation
@@ -21,12 +22,14 @@ __all__ = [
     "Base",
     "Blob",
     "Building",
+    "Canvas",
     "Document",
     "Floor",
     "Location",
     "MaintenanceEvent",
     "MaintenanceTask",
     "Membership",
+    "Placement",
     "Product",
     "Property",
     "SpatialRelation",

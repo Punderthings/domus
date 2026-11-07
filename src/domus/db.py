@@ -38,7 +38,12 @@ def make_engine(url: str) -> Engine:
 
 
 def make_session_factory(engine: Engine) -> sessionmaker[Session]:
-    return sessionmaker(bind=engine, expire_on_commit=False)
+    """Sessions that keep the search index in sync with each commit."""
+    from domus.services import search
+
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    search.install(factory)
+    return factory
 
 
 @contextmanager
