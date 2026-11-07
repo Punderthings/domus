@@ -11,6 +11,7 @@ import { AreaPage } from './pages/AreaPage';
 import { DevicePage } from './pages/DevicePage';
 import { DevicesPage } from './pages/DevicesPage';
 import { FloorPlanPage } from './pages/FloorPlanPage';
+import { HaImportPage } from './pages/HaImportPage';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
 import { SetupPage } from './pages/SetupPage';
@@ -70,10 +71,23 @@ const floorRoute = createRoute({
   component: FloorPlanPage,
 });
 
+const haImportRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/import/home-assistant',
+  component: HaImportPage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   setupRoute,
-  appRoute.addChildren([overviewRoute, areaRoute, floorRoute, devicesRoute, deviceRoute]),
+  appRoute.addChildren([
+    overviewRoute,
+    areaRoute,
+    floorRoute,
+    devicesRoute,
+    deviceRoute,
+    haImportRoute,
+  ]),
 ]);
 
 export function createAppRouter(history: RouterHistory) {

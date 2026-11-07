@@ -3556,6 +3556,90 @@
         }
       }
     },
+    "/api/v1/homeassistant/preview": {
+      "post": {
+        "tags": [
+          "homeassistant"
+        ],
+        "summary": "Preview Import",
+        "description": "Read Home Assistant's registries and show what an import would do. Changes nothing.",
+        "operationId": "preview_import_api_v1_homeassistant_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaConnectIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/homeassistant/apply": {
+      "post": {
+        "tags": [
+          "homeassistant"
+        ],
+        "summary": "Apply Import",
+        "description": "Import in one transaction. Running it again with the same choices changes nothing.",
+        "operationId": "apply_import_api_v1_homeassistant_apply_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaApplyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/calendar.ics": {
       "get": {
         "tags": [
@@ -3933,6 +4017,73 @@
           "access"
         ],
         "title": "AreaOut"
+      },
+      "AreaPlan": {
+        "properties": {
+          "ha_area_id": {
+            "type": "string",
+            "title": "Ha Area Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "ha_floor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ha Floor Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "matched"
+            ],
+            "title": "Status"
+          },
+          "match_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ha_area_id",
+                  "name"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Reason"
+          },
+          "area_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_area_id",
+          "name",
+          "ha_floor_id",
+          "status",
+          "match_reason",
+          "area_id"
+        ],
+        "title": "AreaPlan"
       },
       "AreaUpdate": {
         "properties": {
@@ -5657,6 +5808,256 @@
         ],
         "title": "CompleteOut"
       },
+      "DeviceChoice": {
+        "properties": {
+          "ha_device_id": {
+            "type": "string",
+            "title": "Ha Device Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "create",
+              "link",
+              "skip"
+            ],
+            "title": "Action"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_device_id",
+          "action"
+        ],
+        "title": "DeviceChoice"
+      },
+      "DevicePlan": {
+        "properties": {
+          "ha_device_id": {
+            "type": "string",
+            "title": "Ha Device Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "ha_area_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ha Area Id"
+          },
+          "area_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "matched",
+              "linked",
+              "changed",
+              "ignored"
+            ],
+            "title": "Status"
+          },
+          "match_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ha_device_id",
+                  "connection",
+                  "serial",
+                  "name"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Reason"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "asset_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Name"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "create",
+              "link",
+              "skip"
+            ],
+            "title": "Action"
+          },
+          "can_apply": {
+            "type": "boolean",
+            "title": "Can Apply"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/FieldChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          },
+          "new_identifiers": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierPlan"
+            },
+            "type": "array",
+            "title": "New Identifiers"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_device_id",
+          "name",
+          "manufacturer",
+          "model",
+          "ha_area_id",
+          "area_name",
+          "status",
+          "match_reason",
+          "asset_id",
+          "asset_name",
+          "action",
+          "can_apply",
+          "changes",
+          "new_identifiers",
+          "note"
+        ],
+        "title": "DevicePlan"
+      },
+      "DeviceResult": {
+        "properties": {
+          "ha_device_id": {
+            "type": "string",
+            "title": "Ha Device Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "unchanged",
+              "skipped"
+            ],
+            "title": "Outcome"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_device_id",
+          "name",
+          "outcome",
+          "asset_id",
+          "note"
+        ],
+        "title": "DeviceResult"
+      },
       "DocumentOut": {
         "properties": {
           "id": {
@@ -5959,6 +6360,43 @@
         ],
         "title": "EventOut"
       },
+      "FieldChange": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "old": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old"
+          },
+          "new": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "old",
+          "new"
+        ],
+        "title": "FieldChange"
+      },
       "FloorIn": {
         "properties": {
           "building_id": {
@@ -6057,6 +6495,62 @@
         ],
         "title": "FloorOut"
       },
+      "FloorPlan": {
+        "properties": {
+          "ha_floor_id": {
+            "type": "string",
+            "title": "Ha Floor Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "matched"
+            ],
+            "title": "Status"
+          },
+          "floor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Floor Id"
+          },
+          "building_id": {
+            "type": "string",
+            "title": "Building Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ha_floor_id",
+          "name",
+          "level",
+          "status",
+          "floor_id",
+          "building_id"
+        ],
+        "title": "FloorPlan"
+      },
       "FloorUpdate": {
         "properties": {
           "name": {
@@ -6110,6 +6604,106 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HaApplyIn": {
+        "properties": {
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          },
+          "base_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Base Url",
+            "examples": [
+              "http://homeassistant.local:8123"
+            ]
+          },
+          "token": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Token",
+            "writeOnly": true
+          },
+          "building_for_floor": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "maxProperties": 500,
+            "title": "Building For Floor"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceChoice"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "title": "Devices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url",
+          "token"
+        ],
+        "title": "HaApplyIn"
+      },
+      "HaConnectIn": {
+        "properties": {
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id"
+          },
+          "base_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Base Url",
+            "examples": [
+              "http://homeassistant.local:8123"
+            ]
+          },
+          "token": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Token",
+            "writeOnly": true
+          },
+          "building_for_floor": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "maxProperties": 500,
+            "title": "Building For Floor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url",
+          "token"
+        ],
+        "title": "HaConnectIn"
       },
       "IdentifierIn": {
         "properties": {
@@ -6177,6 +6771,103 @@
         ],
         "title": "IdentifierOut"
       },
+      "IdentifierPlan": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "value"
+        ],
+        "title": "IdentifierPlan"
+      },
+      "ImportPreview": {
+        "properties": {
+          "floors": {
+            "items": {
+              "$ref": "#/components/schemas/FloorPlan"
+            },
+            "type": "array",
+            "title": "Floors"
+          },
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/AreaPlan"
+            },
+            "type": "array",
+            "title": "Areas"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DevicePlan"
+            },
+            "type": "array",
+            "title": "Devices"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "floors",
+          "areas",
+          "devices",
+          "counts"
+        ],
+        "title": "ImportPreview"
+      },
+      "ImportResult": {
+        "properties": {
+          "floors_created": {
+            "type": "integer",
+            "title": "Floors Created"
+          },
+          "areas_created": {
+            "type": "integer",
+            "title": "Areas Created"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceResult"
+            },
+            "type": "array",
+            "title": "Devices"
+          },
+          "relations_created": {
+            "type": "integer",
+            "title": "Relations Created"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "floors_created",
+          "areas_created",
+          "devices",
+          "relations_created",
+          "counts"
+        ],
+        "title": "ImportResult"
+      },
       "LocationIn": {
         "properties": {
           "area_id": {
@@ -6210,7 +6901,8 @@
               "floor",
               "cabinet",
               "closet",
-              "exterior_wall"
+              "exterior_wall",
+              "unspecified"
             ],
             "title": "Kind",
             "default": "wall"
@@ -6369,7 +7061,8 @@
                   "floor",
                   "cabinet",
                   "closet",
-                  "exterior_wall"
+                  "exterior_wall",
+                  "unspecified"
                 ]
               },
               {

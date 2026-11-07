@@ -42,3 +42,12 @@ export type Canvas = Schemas['CanvasOut'];
 export type CanvasKind = Schemas['CanvasIn']['kind'];
 /** One device pin on a canvas, at 0-1 coordinates of the image. */
 export type Placement = Schemas['PlacementOut'];
+
+/** Home Assistant import: what the server would do, and what it did. */
+export type HaPreview = Schemas['ImportPreview'];
+export type HaDevicePlan = Schemas['DevicePlan'];
+export type HaFloorPlan = Schemas['FloorPlan'];
+export type HaDeviceChoice = Schemas['DeviceChoice'];
+export type HaConnectInput = Schemas['HaConnectIn'];
+export type HaApplyInput = Schemas['HaApplyIn'];
+export type HaImportResult = Schemas['ImportResult'];

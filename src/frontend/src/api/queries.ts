@@ -3,7 +3,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { setActivePropertyId } from '../auth/activeProperty';
 import { ApiError, api, unwrap, uploadFile } from './client';
-import type { CanvasKind, Document, LoginInput, Placement, SetupInput } from './types';
+import type {
+  CanvasKind,
+  Document,
+  HaApplyInput,
+  HaConnectInput,
+  LoginInput,
+  Placement,
+  SetupInput,
+} from './types';
 
 export type { LoginInput, SetupInput };
 
@@ -405,5 +413,28 @@ export function useRemovePin() {
         }),
       ),
     onSuccess: () => client.invalidateQueries({ queryKey: ['placements'] }),
+  });
+}
+
+/** Read Home Assistant's registries and show what an import would do. Changes nothing. */
+export function useHaPreview() {
+  return useMutation({
+    mutationFn: (body: HaConnectInput) =>
+      unwrap(api.POST('/api/v1/homeassistant/preview', { body })),
+  });
+}
+
+/** Apply a Home Assistant import, then refresh everything it may have added. */
+export function useHaApply() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: HaApplyInput) => unwrap(api.POST('/api/v1/homeassistant/apply', { body })),
+    onSuccess: async () => {
+      await Promise.all(
+        ['assets', 'areas', 'floors', 'buildings'].map((key) =>
+          client.invalidateQueries({ queryKey: [key] }),
+        ),
+      );
+    },
   });
 }

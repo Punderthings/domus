@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 from tests.asgi_client import Client
+from tests.fake_ha import FakeHa, running_fake_ha
 
 from domus.api.app import create_app
 from domus.config import Settings
@@ -94,3 +95,13 @@ def member_client(app: FastAPI, admin: Client, property_id: str, role: str, emai
     assert r.status_code == 200, r.text
     c.membership_id = r.json()["memberships"][0]["id"]
     return c
+
+
+# --- Home Assistant -----------------------------------------------------------
+
+
+@pytest.fixture
+def fake_ha() -> Generator[FakeHa]:
+    """A fake Home Assistant WebSocket API on 127.0.0.1 (no outside network)."""
+    with running_fake_ha() as ha:
+        yield ha

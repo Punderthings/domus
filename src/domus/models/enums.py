@@ -79,6 +79,9 @@ LOCATION_KINDS = (
     "cabinet",
     "closet",
     "exterior_wall",
+    # Somewhere in the area, not yet pinned down; Home Assistant import puts
+    # devices here because HA only records which area a device is in.
+    "unspecified",
 )
 
 ASSET_CATEGORIES = (

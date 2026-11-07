@@ -796,6 +796,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/homeassistant/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Import
+         * @description Read Home Assistant's registries and show what an import would do. Changes nothing.
+         */
+        post: operations["preview_import_api_v1_homeassistant_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/homeassistant/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply Import
+         * @description Import in one transaction. Running it again with the same choices changes nothing.
+         */
+        post: operations["apply_import_api_v1_homeassistant_apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/calendar.ics": {
         parameters: {
             query?: never;
@@ -938,6 +978,24 @@ export interface components {
              * @enum {string}
              */
             access: "view" | "control" | "manage";
+        };
+        /** AreaPlan */
+        AreaPlan: {
+            /** Ha Area Id */
+            ha_area_id: string;
+            /** Name */
+            name: string;
+            /** Ha Floor Id */
+            ha_floor_id: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "matched";
+            /** Match Reason */
+            match_reason: ("ha_area_id" | "name") | null;
+            /** Area Id */
+            area_id: string | null;
         };
         /** AreaUpdate */
         AreaUpdate: {
@@ -1405,6 +1463,73 @@ export interface components {
             event: components["schemas"]["EventOut"];
             task: components["schemas"]["TaskOut"];
         };
+        /** DeviceChoice */
+        DeviceChoice: {
+            /** Ha Device Id */
+            ha_device_id: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "create" | "link" | "skip";
+            /** Asset Id */
+            asset_id?: string | null;
+        };
+        /** DevicePlan */
+        DevicePlan: {
+            /** Ha Device Id */
+            ha_device_id: string;
+            /** Name */
+            name: string;
+            /** Manufacturer */
+            manufacturer: string | null;
+            /** Model */
+            model: string | null;
+            /** Ha Area Id */
+            ha_area_id: string | null;
+            /** Area Name */
+            area_name: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "matched" | "linked" | "changed" | "ignored";
+            /** Match Reason */
+            match_reason: ("ha_device_id" | "connection" | "serial" | "name") | null;
+            /** Asset Id */
+            asset_id: string | null;
+            /** Asset Name */
+            asset_name: string | null;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "create" | "link" | "skip";
+            /** Can Apply */
+            can_apply: boolean;
+            /** Changes */
+            changes: components["schemas"]["FieldChange"][];
+            /** New Identifiers */
+            new_identifiers: components["schemas"]["IdentifierPlan"][];
+            /** Note */
+            note: string | null;
+        };
+        /** DeviceResult */
+        DeviceResult: {
+            /** Ha Device Id */
+            ha_device_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "created" | "updated" | "unchanged" | "skipped";
+            /** Asset Id */
+            asset_id: string | null;
+            /** Note */
+            note: string | null;
+        };
         /** DocumentOut */
         DocumentOut: {
             /** Id */
@@ -1505,6 +1630,15 @@ export interface components {
             /** Notes */
             notes: string | null;
         };
+        /** FieldChange */
+        FieldChange: {
+            /** Field */
+            field: string;
+            /** Old */
+            old: string | null;
+            /** New */
+            new: string | null;
+        };
         /** FloorIn */
         FloorIn: {
             /** Building Id */
@@ -1547,6 +1681,24 @@ export interface components {
              */
             access: "view" | "control" | "manage";
         };
+        /** FloorPlan */
+        FloorPlan: {
+            /** Ha Floor Id */
+            ha_floor_id: string;
+            /** Name */
+            name: string;
+            /** Level */
+            level: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "new" | "matched";
+            /** Floor Id */
+            floor_id: string | null;
+            /** Building Id */
+            building_id: string;
+        };
         /** FloorUpdate */
         FloorUpdate: {
             /** Name */
@@ -1560,6 +1712,46 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HaApplyIn */
+        HaApplyIn: {
+            /** Property Id */
+            property_id?: string | null;
+            /**
+             * Base Url
+             * @example http://homeassistant.local:8123
+             */
+            base_url: string;
+            /**
+             * Token
+             * Format: password
+             */
+            token: string;
+            /** Building For Floor */
+            building_for_floor?: {
+                [key: string]: string;
+            };
+            /** Devices */
+            devices?: components["schemas"]["DeviceChoice"][];
+        };
+        /** HaConnectIn */
+        HaConnectIn: {
+            /** Property Id */
+            property_id?: string | null;
+            /**
+             * Base Url
+             * @example http://homeassistant.local:8123
+             */
+            base_url: string;
+            /**
+             * Token
+             * Format: password
+             */
+            token: string;
+            /** Building For Floor */
+            building_for_floor?: {
+                [key: string]: string;
+            };
         };
         /** IdentifierIn */
         IdentifierIn: {
@@ -1587,6 +1779,41 @@ export interface components {
             /** Source */
             source: string;
         };
+        /** IdentifierPlan */
+        IdentifierPlan: {
+            /** Kind */
+            kind: string;
+            /** Value */
+            value: string;
+        };
+        /** ImportPreview */
+        ImportPreview: {
+            /** Floors */
+            floors: components["schemas"]["FloorPlan"][];
+            /** Areas */
+            areas: components["schemas"]["AreaPlan"][];
+            /** Devices */
+            devices: components["schemas"]["DevicePlan"][];
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        /** ImportResult */
+        ImportResult: {
+            /** Floors Created */
+            floors_created: number;
+            /** Areas Created */
+            areas_created: number;
+            /** Devices */
+            devices: components["schemas"]["DeviceResult"][];
+            /** Relations Created */
+            relations_created: number;
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+        };
         /** LocationIn */
         LocationIn: {
             /** Area Id */
@@ -1600,7 +1827,7 @@ export interface components {
              * @default wall
              * @enum {string}
              */
-            kind: "wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall";
+            kind: "wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall" | "unspecified";
             /** Orientation */
             orientation?: string | null;
             /** Position Note */
@@ -1645,7 +1872,7 @@ export interface components {
             /** Name */
             name?: string | null;
             /** Kind */
-            kind?: ("wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall") | null;
+            kind?: ("wall" | "window" | "door" | "ceiling" | "floor" | "cabinet" | "closet" | "exterior_wall" | "unspecified") | null;
             /** Orientation */
             orientation?: string | null;
             /** Position Note */
@@ -4403,6 +4630,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SampleDataStatus"];
+                };
+            };
+        };
+    };
+    preview_import_api_v1_homeassistant_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HaConnectIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_import_api_v1_homeassistant_apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HaApplyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
