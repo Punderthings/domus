@@ -456,6 +456,17 @@ class AssetDetailOut(AssetOut):
     identifiers: list[IdentifierOut]
 
 
+# --- Search -----------------------------------------------------------------
+
+
+class SearchOut(BaseModel):
+    """Best matches first, at most ``limit`` of each kind, hidden items left out."""
+
+    query: str
+    assets: list[AssetOut | AssetGuestOut]
+    areas: list[AreaOut]
+
+
 # --- Maintenance ------------------------------------------------------------
 
 

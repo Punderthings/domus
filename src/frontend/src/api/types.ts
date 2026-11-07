@@ -42,6 +42,8 @@ export type Canvas = Schemas['CanvasOut'];
 export type CanvasKind = Schemas['CanvasIn']['kind'];
 /** One device pin on a canvas, at 0-1 coordinates of the image. */
 export type Placement = Schemas['PlacementOut'];
+/** Search hits: devices and areas, best match first, hidden items left out. */
+export type SearchResults = Schemas['SearchOut'];
 
 /** Home Assistant import: what the server would do, and what it did. */
 export type HaPreview = Schemas['ImportPreview'];

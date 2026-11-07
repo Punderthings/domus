@@ -3640,6 +3640,79 @@
         }
       }
     },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Search",
+        "description": "Find devices and areas by name, notes, product, tags, place, or identifier.\n\nEvery word must match, as a word prefix (\"therm\" finds \"Thermostat\").\nGuests never match on identifiers such as serial numbers or MAC\naddresses, or on vendors, since guest responses leave those out.",
+        "operationId": "search_api_v1_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "title": "Q"
+            }
+          },
+          {
+            "name": "property_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Property Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/calendar.ics": {
       "get": {
         "tags": [
@@ -8185,6 +8258,43 @@
         ],
         "title": "SampleDataStatus",
         "description": "Whether the sample home can be loaded from the web interface."
+      },
+      "SearchOut": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "assets": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetOut"
+                },
+                {
+                  "$ref": "#/components/schemas/AssetGuestOut"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Assets"
+          },
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/AreaOut"
+            },
+            "type": "array",
+            "title": "Areas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "assets",
+          "areas"
+        ],
+        "title": "SearchOut",
+        "description": "Best matches first, at most ``limit`` of each kind, hidden items left out."
       },
       "SetupIn": {
         "properties": {

@@ -30,6 +30,7 @@ export const keys = {
   assets: (propertyId: string, filters: AssetFilters) =>
     ['assets', { propertyId, ...filters }] as const,
   asset: (id: string) => ['assets', id] as const,
+  search: (propertyId: string, q: string) => ['search', { propertyId, q }] as const,
   tasks: (propertyId: string, filters: TaskFilters) =>
     ['tasks', { propertyId, ...filters }] as const,
   floor: (id: string) => ['floors', id] as const,
@@ -204,6 +205,22 @@ export function useAsset(id: string) {
     queryKey: keys.asset(id),
     queryFn: ({ signal }) =>
       unwrap(api.GET('/api/v1/assets/{asset_id}', { params: { path: { asset_id: id } }, signal })),
+  });
+}
+
+/** Devices and areas matching every word of `q` (the backend's full-text index). */
+export function useSearchResults(propertyId: string | undefined, q: string) {
+  const query = q.trim();
+  return useQuery({
+    queryKey: keys.search(propertyId ?? '', query),
+    queryFn: ({ signal }) =>
+      unwrap(
+        api.GET('/api/v1/search', {
+          params: { query: { q: query, property_id: propertyId, limit: 50 } },
+          signal,
+        }),
+      ),
+    enabled: Boolean(propertyId) && query.length > 0,
   });
 }
 
