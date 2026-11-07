@@ -772,6 +772,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sample-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sample Data Status
+         * @description Whether this install ships the sample home, and whether it is already loaded.
+         */
+        get: operations["sample_data_status_api_v1_sample_data_get"];
+        put?: never;
+        /**
+         * Load Sample Data
+         * @description Add the sample home as a new property, with the caller as its Admin.
+         */
+        post: operations["load_sample_data_api_v1_sample_data_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/calendar.ics": {
         parameters: {
             query?: never;
@@ -1923,6 +1947,18 @@ export interface components {
             timezone?: string | null;
             /** Default Currency */
             default_currency?: string | null;
+        };
+        /**
+         * SampleDataStatus
+         * @description Whether the sample home can be loaded from the web interface.
+         */
+        SampleDataStatus: {
+            /** Available */
+            available: boolean;
+            /** Loaded */
+            loaded: boolean;
+            /** Property Id */
+            property_id: string | null;
         };
         /** SetupIn */
         SetupIn: {
@@ -4327,6 +4363,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_data_status_api_v1_sample_data_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleDataStatus"];
+                };
+            };
+        };
+    };
+    load_sample_data_api_v1_sample_data_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleDataStatus"];
                 };
             };
         };

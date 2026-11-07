@@ -98,6 +98,14 @@ class SetupStatus(BaseModel):
     needs_setup: bool
 
 
+class SampleDataStatus(BaseModel):
+    """Whether the sample home can be loaded from the web interface."""
+
+    available: bool  # this install ships the sample dataset
+    loaded: bool  # Sample Home already exists with members (or was deleted)
+    property_id: str | None  # the Sample Home property, when available
+
+
 class SetupIn(BaseModel):
     email: Annotated[str, Field(min_length=3, max_length=320, pattern=r"^[^@\s]+@[^@\s]+$")]
     display_name: Name

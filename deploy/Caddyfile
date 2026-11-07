@@ -1,0 +1,8 @@
+# Caddy reverse proxy for Domus, used by the "https" profile in compose.yaml.
+# `tls internal` uses Caddy's own local certificate authority, which suits a
+# home network name such as domus.home.arpa. For a public name with DNS pointing
+# at this host, remove that line and Caddy gets a certificate from Let's Encrypt.
+{$DOMUS_HOSTNAME} {
+	tls internal
+	reverse_proxy domus:8000
+}
