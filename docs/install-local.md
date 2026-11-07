@@ -252,14 +252,16 @@ Inside it:
 | Path | What it holds |
 | :-- | :-- |
 | `domus.sqlite` | The database. `-wal` and `-shm` files next to it are part of it while the server runs. |
-| `blobs/` | Stored files, named by SHA-256 hash (created when the first file is added) |
+| `blobs/` | Uploaded files (floor plans, wall photos, manuals), named by SHA-256 hash; created with the first upload |
 | `backups/` | Backups made with `domus backup create`, and the automatic safety copies made before each restore |
 
 With the server stopped, copying the whole data folder is also a valid backup. Backups
 contain password hashes and everything about your home, so keep them somewhere private.
 
-> **Coming in v0.1:** floor plans and photo pins, and search. Floor plan images and
-> photos will be stored in `blobs/` and included in backups like everything else.
+Uploaded images are re-encoded when they are saved, which removes EXIF data such as GPS
+location. They are stored in `blobs/` and included in backups like everything else.
+
+> **Coming in v0.1:** search.
 
 ## Back up, verify, and restore
 
@@ -362,8 +364,8 @@ Run each `domus` command from inside the checkout named in the step
 - [ ] `export DOMUS_DATA_DIR="$T/data-old"`
 - [ ] Load the sample home: `uv run domus restore examples/sample-home --merge`.
 - [ ] Start `uv run domus serve`, create an Admin, and make a few changes by hand: edit a
-      device, add one, and log a maintenance event. Stop the server.
-      (Once file uploads exist, also upload a photo or manual, so blobs are tested too.)
+      device, add one, log a maintenance event, and upload a floor plan with a device pin
+      on it, so files are tested too. Stop the server.
 - [ ] `uv run domus backup create --output "$T/old.hiotbak"`
 - [ ] `uv run domus backup verify "$T/old.hiotbak"` reports OK.
 - [ ] `uv run domus export "$T/export-old"`
@@ -377,7 +379,7 @@ Run each `domus` command from inside the checkout named in the step
 - [ ] `diff -r -x manifest.json "$T/export-old" "$T/export-upgraded"` shows no changes,
       or only the changes the release notes describe (for example a new column).
 - [ ] Start `uv run domus serve`, sign in with the same Admin, and spot-check the records
-      you changed on OLD.
+      you changed on OLD, including the floor plan and its pin.
 
 **On NEW, restore the OLD backup into a fresh instance:**
 
@@ -426,6 +428,7 @@ Domus reads settings from environment variables that start with `DOMUS_`.
 | `DOMUS_LOGIN_MAX_FAILURES` | `5` | Failed sign-ins allowed per window before Domus blocks more attempts |
 | `DOMUS_LOGIN_WINDOW_SECONDS` | `300` | Length of that window |
 | `DOMUS_BACKUP_MAX_BYTES` | `2147483648` (2 GiB) | Largest size a backup may expand to when verified or restored |
+| `DOMUS_UPLOAD_MAX_BYTES` | `26214400` (25 MiB) | Largest single file upload (photos, floor plans, manuals) |
 | `DOMUS_SAMPLE_DATA_DIR` | `examples/sample-home` in a source checkout (`/opt/domus/examples/sample-home` in Docker) | The sample home that **Load sample data** imports |
 
 `domus serve` takes `--host` (default `127.0.0.1`) and `--port` (default `8000`). The

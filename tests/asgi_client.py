@@ -55,10 +55,17 @@ class Client:
         path: str,
         *,
         json: Any = None,
+        content: bytes | None = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
-        body = b"" if json is None else jsonlib.dumps(json).encode()
+        body = (
+            content
+            if content is not None
+            else b""
+            if json is None
+            else jsonlib.dumps(json).encode()
+        )
         hdrs = {**self.headers, **(headers or {})}
         if json is not None:
             hdrs.setdefault("content-type", "application/json")
@@ -66,7 +73,9 @@ class Client:
             hdrs["cookie"] = "; ".join(f"{k}={v}" for k, v in self.cookies.items())
             if self.send_csrf and "domus_csrf" in self.cookies:
                 hdrs.setdefault("x-csrf-token", self.cookies["domus_csrf"])
+        path, _, inline_query = path.partition("?")
         query = urlencode({k: v for k, v in (params or {}).items() if v is not None}, doseq=True)
+        query = "&".join(q for q in (inline_query, query) if q)
         scope: dict[str, Any] = {
             "type": "http",
             "asgi": {"version": "3.0"},

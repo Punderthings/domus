@@ -61,9 +61,14 @@ function BuildingSection({ building, areas }: { building: Building; areas: Area[
       {floors.isError && <ErrorNotice error={floors.error} />}
       {sortedFloors.map((floor) => (
         <Stack key={floor.id} gap="xs">
-          <Title order={4} c="dimmed">
-            {floor.name}
-          </Title>
+          <Group gap="sm">
+            <Title order={4} c="dimmed">
+              {floor.name}
+            </Title>
+            <AnchorLink size="sm" to="/floors/$floorId" params={{ floorId: floor.id }}>
+              Floor plan
+            </AnchorLink>
+          </Group>
           <AreaGrid areas={inBuilding.filter((area) => area.floor_id === floor.id)} />
         </Stack>
       ))}

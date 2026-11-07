@@ -3,9 +3,11 @@ import type {
   Area,
   AssetDetail,
   Building,
+  Canvas,
   CurrentUser,
   Floor,
   MaintenanceTask,
+  Placement,
   Property,
   Role,
 } from '../api/types';
@@ -13,7 +15,7 @@ import type {
 const stamp = { created_at: '2026-11-05T00:00:00Z', updated_at: '2026-11-05T00:00:00Z' };
 export const PROPERTY_ID = '01a1a901-5800-7001-8000-000000000001';
 const BUILDING_ID = '01a1a901-5800-7002-8000-000000000002';
-const MAIN_FLOOR = '01a1a901-5800-7003-8000-000000000003';
+export const MAIN_FLOOR = '01a1a901-5800-7003-8000-000000000003';
 const BASEMENT = '01a1a901-5800-7004-8000-000000000004';
 export const KITCHEN_ID = '01a1a901-5800-7005-8000-000000000005';
 export const FRIDGE_ID = '01a1a901-5800-7012-8000-000000000012';
@@ -163,6 +165,41 @@ export function task(overrides: Partial<MaintenanceTask>): MaintenanceTask {
     next_due: '2027-03-01',
     lead_days: 7,
     active: true,
+    access: 'manage',
+    ...overrides,
+  };
+}
+
+export const PLAN_ID = 'c1';
+
+export function floorPlan(overrides: Partial<Canvas> = {}): Canvas {
+  return {
+    id: PLAN_ID,
+    ...stamp,
+    property_id: PROPERTY_ID,
+    document_id: 'd1',
+    scope_type: 'floor',
+    scope_id: MAIN_FLOOR,
+    kind: 'floor_plan',
+    name: null,
+    scale_px_per_m: null,
+    image_url: `/api/v1/canvases/${PLAN_ID}/image?v=d1`,
+    access: 'manage',
+    ...overrides,
+  };
+}
+
+export function fridgePin(overrides: Partial<Placement> = {}): Placement {
+  return {
+    id: 'pin1',
+    ...stamp,
+    canvas_id: PLAN_ID,
+    asset_id: FRIDGE_ID,
+    asset_name: 'Refrigerator',
+    x: 0.25,
+    y: 0.75,
+    label: null,
+    shape: 'point',
     access: 'manage',
     ...overrides,
   };
