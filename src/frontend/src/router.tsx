@@ -8,6 +8,8 @@ import {
 import { AppLayout } from './components/AppLayout';
 import { NotFound } from './components/States';
 import { AreaPage } from './pages/AreaPage';
+import { BackupsPage } from './pages/BackupsPage';
+import { DeviceEditPage, DeviceNewPage } from './pages/DeviceFormPage';
 import { DevicePage } from './pages/DevicePage';
 import { DevicesPage } from './pages/DevicesPage';
 import { LoginPage } from './pages/LoginPage';
@@ -63,10 +65,36 @@ const deviceRoute = createRoute({
   component: DevicePage,
 });
 
+const deviceNewRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/devices/new',
+  component: DeviceNewPage,
+});
+
+const deviceEditRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/devices/$deviceId/edit',
+  component: DeviceEditPage,
+});
+
+const backupsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/admin/backups',
+  component: BackupsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   setupRoute,
-  appRoute.addChildren([overviewRoute, areaRoute, devicesRoute, deviceRoute]),
+  appRoute.addChildren([
+    overviewRoute,
+    areaRoute,
+    devicesRoute,
+    deviceNewRoute,
+    deviceRoute,
+    deviceEditRoute,
+    backupsRoute,
+  ]),
 ]);
 
 export function createAppRouter(history: RouterHistory) {

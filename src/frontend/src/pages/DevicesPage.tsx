@@ -3,7 +3,9 @@ import { useDebouncedValue } from '@mantine/hooks';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useAreas, useAssets } from '../api/queries';
+import { hasRole, toRole } from '../auth/permissions';
 import { useActiveMembership } from '../auth/useActiveProperty';
+import { ButtonLink } from '../components/links';
 import { DeviceTable } from '../components/DeviceTable';
 import { ErrorNotice, PageLoader } from '../components/States';
 import { terms } from '../terms';
@@ -11,7 +13,9 @@ import { terms } from '../terms';
 export function DevicesPage() {
   const search = useSearch({ from: '/app/devices' });
   const navigate = useNavigate({ from: '/devices' });
-  const propertyId = useActiveMembership()?.property_id;
+  const membership = useActiveMembership();
+  const propertyId = membership?.property_id;
+  const canAdd = membership !== undefined && hasRole(toRole(membership.role), 'maintainer');
   const areas = useAreas(propertyId);
   const [text, setText] = useState(search.q ?? '');
   const [debounced] = useDebouncedValue(text, 300);
@@ -29,7 +33,10 @@ export function DevicesPage() {
 
   return (
     <Stack>
-      <Title order={2}>{terms.devices}</Title>
+      <Group justify="space-between">
+        <Title order={2}>{terms.devices}</Title>
+        {canAdd && <ButtonLink to="/devices/new">Add {terms.device.toLowerCase()}</ButtonLink>}
+      </Group>
       <Group grow preventGrowOverflow={false} wrap="wrap">
         <TextInput
           label="Search"
