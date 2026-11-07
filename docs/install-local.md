@@ -4,8 +4,8 @@ This guide gets Domus running on one computer, loads the sample home so you have
 something to click through, and shows how to back up, restore, and check your data. The
 last section is a checklist for testing upgrades.
 
-It describes what is on `main` today (v0.1 in progress). Notes marked **Coming in v0.1**
-mark where features that are still being built will be documented.
+It describes what is on `main` today: the v0.1 features are merged, and no release is
+tagged yet.
 
 > **Before v0.3, upgrades may not keep your data.** The database schema and backup format
 > can still change between versions with no upgrade path, so a newer Domus may not open
@@ -21,10 +21,11 @@ mark where features that are still being built will be documented.
 5. [Load the sample home](#load-the-sample-home)
 6. [Connect Home Assistant (optional)](#connect-home-assistant-optional)
 7. [Where your data lives](#where-your-data-lives)
-8. [Back up, verify, and restore](#back-up-verify-and-restore)
-9. [Upgrade test checklist](#upgrade-test-checklist)
-10. [Settings](#settings)
-11. [Troubleshooting](#troubleshooting)
+8. [Search](#search)
+9. [Back up, verify, and restore](#back-up-verify-and-restore)
+10. [Upgrade test checklist](#upgrade-test-checklist)
+11. [Settings](#settings)
+12. [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -161,7 +162,7 @@ curl http://127.0.0.1:8000/api/v1/health         # {"status":"ok","version":"...
 ## Load the sample home
 
 The sample home in [`examples/sample-home/`](https://github.com/punderthings/domus/tree/main/examples/sample-home) is a
-small fictional property: one house, two floors, four rooms, nine devices, five
+small fictional property: one house, two floors, four areas, nine devices, five
 maintenance tasks (two already overdue), tags, and access rules. Use it to try Domus or
 to test changes by hand.
 
@@ -169,7 +170,7 @@ There are two ways to load it. Both give you the same data.
 
 ### From the web interface
 
-Sign in as an Admin. While your property has no rooms yet (as it is right after setup),
+Sign in as an Admin. While your property has no areas yet (as it is right after setup),
 the Overview shows **Try Domus with sample data**. Select **Load sample data**: Domus adds
 Sample Home as a second property, makes you its Admin, and switches to it. Your own
 property isn't changed. To switch between the two, open the account menu (the round
@@ -230,13 +231,36 @@ To start over, stop the server and delete the data folder (here `.domus-test`; f
 
 ## Connect Home Assistant (optional)
 
-Domus works on its own; Home Assistant is optional. Devices already have fields for
-Home Assistant device and entity ids (the sample Living Room Light Switch has them), and
-you can fill those in by hand today.
+Domus works on its own; Home Assistant is optional. In v0.1, Domus can import floors,
+areas, and devices from Home Assistant. Live state and control from Domus come in v0.2.
 
-> **Coming in v0.1:** importing areas and devices from Home Assistant. This section will
-> cover creating a long-lived access token in Home Assistant, giving it to Domus, and
-> running the import.
+You need to be a Maintainer or Admin in Domus, and the Domus server must be able to reach
+Home Assistant over the network.
+
+1. In Home Assistant, open your profile (your name, bottom left), go to the **Security**
+   tab, and under **Long-lived access tokens** select **Create token**. Use a Home
+   Assistant admin user, because only admins can read the device registry. Copy the token.
+2. In Domus, select **Import from HA** in the menu. Enter the address you open Home
+   Assistant at (for example `http://homeassistant.local:8123`) and paste the token.
+3. Select **Preview import**. Domus reads the floors, areas, and devices, matches them with what
+   is already in Domus (by Home Assistant id, then MAC address, then serial number, then a
+   similar name in the same area), and shows what each device would do. Nothing is saved
+   yet.
+4. If Home Assistant has floors Domus doesn't know, choose which building each one goes
+   in (the main building by default). Change the action for any device you want to skip
+   or link differently.
+5. Select **Import N devices**. It runs in one step: everything is saved or nothing is.
+
+Domus uses the token for that import only. It doesn't save, log, or return it, so you
+paste it again for the next import, and you can delete it in Home Assistant afterwards.
+
+Importing again later adds only what is new and fills in missing details. It never
+overwrites a name or other field you changed in Domus. A device that Home Assistant puts
+in an area but not at a spot goes to that area's **Somewhere in this area** location, so
+you can move it later.
+
+With Docker, `homeassistant.local` may not resolve inside the container. Use Home
+Assistant's IP address instead.
 
 ## Where your data lives
 
@@ -261,7 +285,13 @@ contain password hashes and everything about your home, so keep them somewhere p
 Uploaded images are re-encoded when they are saved, which removes EXIF data such as GPS
 location. They are stored in `blobs/` and included in backups like everything else.
 
-> **Coming in v0.1:** search.
+## Search
+
+Use the search box at the top of every page, or the **Search** page. Search covers
+devices and areas: names, notes, makes and models, tags, areas, locations, serial
+numbers, and MAC addresses and other ids. Every word must match the start of a word,
+so `therm` finds "Thermostat". Guests' results never match serial numbers, network ids,
+or other details they can't see.
 
 ## Back up, verify, and restore
 
@@ -271,6 +301,12 @@ one JSONL file per table, and the blobs. You can open them with any zip tool.
 ### Make a backup
 
 The server can keep running.
+
+From the web interface, an Admin opens **Backups** in the menu and selects **Make a
+backup now**, then downloads it from the list. A backup holds every property on the
+server, so this needs you to be an Admin of all of them.
+
+From the command line:
 
 ```sh
 uv run domus backup create
@@ -302,6 +338,7 @@ is newer than this app.
 ### Restore a backup
 
 **Stop the server first.** A full restore replaces all current data, accounts included.
+Restore is done from the command line only in v0.1, not from the web interface.
 
 ```sh
 uv run domus restore --dry-run path/to/backup.hiotbak   # what would change; saves nothing
@@ -422,7 +459,7 @@ Domus reads settings from environment variables that start with `DOMUS_`.
 | Variable | Default | What it does |
 | :-- | :-- | :-- |
 | `DOMUS_DATA_DIR` | `~/.local/share/domus` (`/data` in Docker) | Folder for the database, files, and backups |
-| `DOMUS_DATABASE_URL` | SQLite in the data folder | Database URL. Leave unset; PostgreSQL support is experimental and not in v0.1 yet. |
+| `DOMUS_DATABASE_URL` | SQLite in the data folder | Database URL. Leave unset to use SQLite. PostgreSQL 15+ is experimental: install the `postgres` extra (`uv sync --extra postgres`) and use a URL like `postgresql+pg8000://user:password@host/domus`. The Docker image doesn't include it. |
 | `DOMUS_COOKIE_SECURE` | `true` | Send the login cookie over HTTPS only (plain http to `localhost` and `127.0.0.1` still works). Set `false` only for plain http on a trusted network. |
 | `DOMUS_SESSION_DAYS` | `14` | How long a sign-in lasts |
 | `DOMUS_LOGIN_MAX_FAILURES` | `5` | Failed sign-ins allowed per window before Domus blocks more attempts |
