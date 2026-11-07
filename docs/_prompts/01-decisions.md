@@ -1,6 +1,6 @@
 # Planning decisions
 
-Decisions made by Shane Curcuru during the initial planning session on 2026-11-06, in the order they were made. The plan documents in [plan/](plan/) reflect all of them.
+Decisions made by Shane Curcuru during planning and the v0.1 build (2026-11-06 to 2026-11-07). Numbers are in the order the decisions were recorded here, which is not always the order they were made: decisions 24 to 30 were made during the v0.1 build and recorded in pull requests or project threads before they were added to this list. The plan documents in [plan/](plan/) reflect all of them.
 
 ## Kickoff
 
@@ -20,7 +20,7 @@ Decisions made by Shane Curcuru during the initial planning session on 2026-11-0
 | 8 | Notifications | iCal feed only for the first version. |
 | 9 | Buildings | A property can have multiple buildings (house, garage, shed) with basic spatial relationships to each other; a future outdoor map covers landscape lighting and similar. |
 | 10 | Python version | Python 3.14+ for all work. |
-| 11 | Maintainer role | Add a Maintainer role: can add new items and program most IoT/HA items or integrations, but cannot change Admins and cannot edit selected "critical" components. Example: the teenager who adds a game console and TV but is not allowed to access the master bedroom controls. Storage design is proposed in the plan (critical flag + access rules) and awaits confirmation. |
+| 11 | Maintainer role | Add a Maintainer role: can add new items and program most IoT/HA items or integrations, but cannot change Admins and cannot edit selected "critical" components. Example: the teenager who adds a game console and TV but is not allowed to access the master bedroom controls. Storage design: a critical flag plus access rules (data-storage-backup.md section 2.3.1), built as written in v0.1 (`src/domus/services/access.py`). |
 | 12 | Name and repository | The project is named **Domus**; the repository is `punderthings/domus`. |
 | 13 | Design docs location | Keep the design history in `docs/_prompts/` so all documentation is in one place. |
 | 14 | AGENTS.md | The plan follows the repository's AGENTS.md (ASF Category A licenses for every dependency, uv, no-network tests, commit trailers, maintainer approval for new dependencies, workflows, and backup-incompatible changes). |
@@ -33,3 +33,10 @@ Decisions made by Shane Curcuru during the initial planning session on 2026-11-0
 | 21 | Home Assistant client | Add `websockets` (BSD-3-Clause, no dependencies) as a core runtime dependency for the Home Assistant WebSocket API, which is the only API with the device, area, and floor registries (PR #10). |
 | 22 | Imported device placement | When Home Assistant only knows a device's Area, the import puts it in one general location per Area, of the new location kind `unspecified` ("Somewhere in this area"), so Area filters and access rules cover it; users can move it later (PR #10). |
 | 23 | Generic BSD license | Packages whose metadata says only "BSD License" are accepted across the board, with no per-package review; "BSD" and "BSD-3-Clause" are both acceptable (Shane, 2026-11-07). |
+| 24 | Database layer | Synchronous SQLAlchemy 2 with the standard library `sqlite3` driver. PostgreSQL uses `pg8000>=1.31.5` (BSD-3-Clause, pure Python; 1.31.5 fixes CVE-2025-61385) as the optional `domus[postgres]` extra. This replaces the earlier aiosqlite and asyncpg proposal. Async code is still fine for the Home Assistant WebSocket client (Shane, 2026-11-06). |
+| 25 | UI terms | The UI says **Area** (Home Assistant's word, which also covers outdoor spaces) and **Device** (what homeowners say, for a furnace as well as a smart plug). The API and data model keep `area` and `asset`. The display words live in `src/frontend/src/terms.ts` (Shane, 2026-11-06). |
+| 26 | Docs site | Build the user docs with Zensical (MIT), configured in `mkdocs.yml`, in its own `docs` dependency group. Its `pathspec` dependency (MPL-2.0) is a build-only tool under decision 20 (Shane, 2026-11-06, PR #9). |
+| 27 | Sample data in the UI | An Admin-only **Load sample data** button adds Sample Home as a second property, and the account menu gets a property switcher. The CLI import into a blank instance stays for manual testing (Shane, 2026-11-06, PR #9). |
+| 28 | Data compatibility | No database, schema, or backup compatibility is promised during v0.1 and v0.2: schemas may change freely, and a newer version need not open older data or restore older backups. The "migrate forward" rule starts with v0.3 (Shane, 2026-11-06). |
+| 29 | Guest uploads | Guests never get upload features: no photos, files, or floor plans. Uploads need Resident or above (Shane, 2026-11-07, PR #8). |
+| 30 | Restore in v0.1 | The web UI makes, lists, and downloads backups (Admin of every property only, because a backup holds all of them). Restore stays CLI-only in v0.1, because it replaces the database under the running server (Shane, 2026-11-07, PR #12). |

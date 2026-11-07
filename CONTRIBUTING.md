@@ -27,6 +27,9 @@ uv run pip-licenses --from=mixed --format=json | uv run python scripts/check_lic
 
 Tests must not use the network; stub or mock every fetch.
 
+The front end in `src/frontend/` has its own checks (ESLint, Prettier, TypeScript,
+Vitest, build, and an npm license check); see [its README](src/frontend/README.md).
+
 ### Testing on PostgreSQL (experimental)
 
 SQLite is the default. To run the same suite against a local PostgreSQL 15+

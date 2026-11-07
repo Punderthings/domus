@@ -1,6 +1,6 @@
 # Home IoT Maintenance App: Master Plan
 
-Status: **Draft v0.3** (2026-11-06). Front end decided (React + Mantine). Backend decided (Python/FastAPI). Name (Domus) and repo (punderthings/domus) decided. Open: confirm the access rule design in section 2.
+Status: **v0.4** (2026-11-07). All decisions are recorded in [01-decisions.md](../01-decisions.md). The v0.1 build is merged on `main` (PRs #1 to #12); section 12 lists what is built and what from the v0.1 scope is still to do. No release is tagged yet.
 Project name: **Domus**. Repository: [punderthings/domus](https://github.com/punderthings/domus).
 
 ---
@@ -23,8 +23,8 @@ Design principles:
 | :-- | :-- |
 | **Admin** | Everything: users, backup/restore, HA connection settings, delete. |
 | **Maintainer** | Everything a Resident can do, plus adding and configuring devices and integrations: HA connection and import, mapping HA devices to assets, editing rooms and floor plans, and (v0.3+) programming HA items and automations. Cannot manage users or change any Admin, cannot run restore or delete the property, cannot edit critical items, and is limited by any access rules an Admin sets. |
-| **Resident** | Create/edit assets, locations, tasks; log maintenance; upload photos; view HA state; trigger HA actions (v2). |
-| **Guest** | Sees only items marked public, plus a "house guide" subset (for example, where the water shutoff is). Never sees costs, receipts, serials, or network ids. Can control (v0.2+) only items an access rule allows. |
+| **Resident** | Create/edit assets, locations, tasks; log maintenance; upload photos, files, and floor plans; view HA state; trigger HA actions (v0.2+). |
+| **Guest** | Sees only items marked public, plus a "house guide" subset (for example, where the water shutoff is). Never sees costs, receipts, serials, or network ids. Never uploads photos, files, or plans (decision 29). Can control (v0.2+) only items an access rule allows. |
 
 API tokens (personal access tokens) inherit the owner's role, with an optional read-only scope for integrations.
 
@@ -43,22 +43,23 @@ API tokens (personal access tokens) inherit the owner's role, with an optional r
 
 ## 3. Scope by release
 
-**v0.1 MVP** (the schema supports several properties per install, which Shane confirmed; the v0.1 UI shows one property with a switcher added later)
+**v0.1 MVP** (the schema supports several properties per install, which Shane confirmed; the v0.1 UI has a property switcher in the account menu, decision 27). Section 12 shows which items are built.
 - Inventory: assets with name, category, manufacturer, model, serial, MAC, install date, warranty, purchase info, notes, tags, links to manuals.
-- Locations: Property > Building > Floor > Room > Location (wall + position, window, ceiling, etc.). A property can have several buildings (house, garage, shed), and outdoor areas (yard, driveway) attach directly to the property.
+- Locations: Property > Building > Floor > Area > Location (wall + position, window, ceiling, etc.). A property can have several buildings (house, garage, shed), and outdoor areas (yard, driveway) attach directly to the property.
 - Maintenance: recurring tasks with intervals ("every 6 months", "every November"), due list, mark done, auto-reschedule, completion log with cost and notes.
 - Attachments: photos (device label, wall), PDFs (manuals), with thumbnails.
 - Floor plan viewer: upload an image per floor, drop pins for assets. Wall photo viewer with hotspot pins.
 - HA import: connect with a long-lived token, preview devices/areas/floors, match existing assets, import selected without duplicates.
 - Auth: local users with Admin/Maintainer/Resident/Guest.
-- Backup/restore: one-click archive (DB + files + manifest), scheduled backups, restore from UI or CLI.
+- Backup/restore: one-click archive (DB + files + manifest), scheduled backups, restore from the CLI (restore from the UI was dropped for v0.1, decision 30).
 - Read-only REST API and iCal feed of upcoming maintenance.
+- Search across names, models, serials, MACs, areas, and tags (moved up from v0.2 and built in v0.1).
 - Example dataset: a small sample property that can be imported in one step, for demos, tests, and trying the app (see section 10, step 11).
 - Docs: a comprehensive "How To Install Locally" guide, including how to make and restore a backup so maintainers can test upgrades between versions as we build (section 10, step 12).
 
 **v0.2**
 - Live HA context on asset page (state, last seen, IP/network, battery, power source) via WebSocket.
-- Search across everything (name, model, serial, MAC, room, tag, circuit).
+- Search: add circuits and PDF manual text (basic search shipped in v0.1).
 - Parts catalog per asset (filter part numbers, purchase links) and procedures (step lists).
 - Notifications: email (SMTP), HA persistent notification / mobile push via HA, ntfy/webhook.
 - CSV/JSON export of selected records; printable QR labels for assets.
@@ -87,13 +88,13 @@ API tokens (personal access tokens) inherit the owner's role, with an optional r
  │  ├─ /calendar.ics  iCal feed (token in URL, read-only)                │
  │  ├─ Services: inventory, locations, maintenance, attachments,         │
  │  │            ha_sync, backup, notifications                          │
- │  ├─ Scheduler (APScheduler, in-process): due-date checks, backups,   │
+ │  ├─ Scheduler (APScheduler, in-process, not built yet): backups,     │
  │  │            HA resync                                               │
- │  └─ HA client (httpx + websockets), optional                          │
+ │  └─ HA client (websockets, sync), optional                            │
  └───────┬──────────────────────────────┬───────────────────────────────┘
          ▼                              ▼
   SQLite (default) or PostgreSQL   Files dir (photos, manuals, thumbs,
-  via SQLAlchemy 2 + Alembic       floor plans), content-addressed
+  via sync SQLAlchemy 2 + Alembic  floor plans), content-addressed
                                          │
                        Home Assistant (optional) ◄── REST + WebSocket API
 ```
@@ -113,8 +114,8 @@ Key decisions:
 | Building | id, property_id, name, kind (house, garage, shed, barn, pool_house, other), is_primary, notes; site placement (v0.3+): site_x, site_y in meters in a local per-property grid (origin is a user-chosen point, x east, y north), rotation, footprint polygon. No latitude/longitude by default, for privacy. |
 | SpatialRelation | id, from_type/from_id and to_type/to_id (building or area), kind (attached_to, adjacent_to, detached, connected_by), via (breezeway, buried conduit, ...), distance_m, bearing, notes |
 | Floor | id, building_id, name, level, floor_plan attachment, ha_floor_id |
-| Room (HA "area") | id, floor_id (nullable), property_id, name, kind (room, hallway, attic, yard, driveway, ...), ha_area_id. Outdoor areas have no floor, belong to the property directly, and get site_x, site_y, and a footprint (v0.3+). |
-| Location | id, room_id, kind (wall, ceiling, floor, window, door, exterior, inside_asset), wall (N/E/S/W or label), x/y on floor plan, x/y on wall photo, description |
+| Area (HA "area"; the UI says Area, decision 25) | id, floor_id (nullable), property_id, name, kind (room, hallway, attic, yard, driveway, ...), ha_area_id. Outdoor areas have no floor, belong to the property directly, and get site_x, site_y, and a footprint (v0.3+). |
+| Location | id, area_id, kind (wall, ceiling, floor, window, door, exterior, inside_asset, unspecified for "somewhere in this area", decision 22), wall (N/E/S/W or label), x/y on floor plan, x/y on wall photo, description |
 | Asset | id (UUIDv7), name, category, manufacturer, model, serial, mac_addresses[], other_ids (JSON), install_date, purchase_date, warranty_until, power_source, network info, location_id, parent_asset_id, status, notes, ha_device_id, ha_entity_ids[] |
 | Attachment | id, owner (asset/location/floor/task), kind (photo, manual, receipt, label), sha256, mime, filename, url (external link alternative) |
 | MaintenanceTask | id, asset_id or location_id, title, procedure (markdown), recurrence (RFC 5545 RRULE or "N days after last done"), next_due, lead_time, parts[] |
@@ -135,7 +136,7 @@ HA exposes everything we need, without a custom component, through its WebSocket
 | HA command | Used for |
 | :-- | :-- |
 | `config/floor_registry/list` | Floors (HA has no building concept, so on import the user assigns each HA floor to a building, defaulting to the primary building) |
-| `config/area_registry/list` | Rooms |
+| `config/area_registry/list` | Areas |
 | `config/device_registry/list` | Devices: manufacturer, model, sw/hw version, serial, `connections` (MAC), `identifiers`, area |
 | `config/entity_registry/list` | Entities per device |
 | `config/label_registry/list` | Labels to tags |
@@ -154,7 +155,7 @@ Future HA custom integration (v0.3, Python, in a separate repo, HACS-installable
 
 ### 4.3 API design
 
-- REST, JSON, `/api/v1`, OpenAPI 3.1 auto-generated, served at `/api/docs`.
+- REST, JSON, `/api/v1`, OpenAPI 3.1 auto-generated, served at `/api/v1/docs` (document at `/api/v1/openapi.json`).
 - Read-only endpoints for every core entity (list with filters + pagination, get by UUID). Write endpoints exist for the UI but are documented as "unstable" until v1.0.
 - Field naming follows HA where it overlaps (`area_id`, `floor_id`, `device_id`, `manufacturer`, `model`, `sw_version`, `serial_number`, `connections`).
 - Auth: secure HttpOnly session cookie for the browser (with CSRF token); bearer personal access tokens for integrations.
@@ -185,8 +186,8 @@ All front end assets are bundled into the image. No runtime CDN calls, so it wor
 - Backup = one `.hiotbak` zip containing a consistent DB snapshot, an engine-neutral JSONL export, the referenced files, and a `manifest.json` (app version, schema version, checksums).
 - Plus a **portable JSON export** of all records so data survives even if the app is abandoned.
 - Scheduled backups with retention; optional copy to a second path or S3 target.
-- Restore runs migrations forward if the backup is from an older schema version.
-- Any change that makes older backups incompatible with a new version needs a maintainer decision first, so maintainers can decide whether it needs a new major version (AGENTS.md).
+- Restore runs migrations forward if the backup is from an older schema version. This is promised only from v0.3 on: during v0.1 and v0.2, schemas and backups may change with no upgrade path (decision 28).
+- From v0.3, any change that makes older backups incompatible with a new version needs a maintainer decision first, so maintainers can decide whether it needs a new major version (AGENTS.md).
 - CLI `domus backup|restore|export` works with the server stopped and without HA.
 
 ## 5. Candidate libraries and licenses (backend)
@@ -196,28 +197,29 @@ All front end assets are bundled into the image. No runtime CDN calls, so it wor
 | Web framework | FastAPI, Starlette, Uvicorn | MIT, BSD-3, BSD-3 |
 | Models / validation / settings | Pydantic v2, pydantic-settings | MIT |
 | ORM / migrations | SQLAlchemy 2, Alembic | MIT |
-| Postgres driver | asyncpg | Apache-2.0 (**avoid psycopg2/3: LGPL**) |
-| SQLite async | aiosqlite | MIT |
+| Postgres driver | pg8000 >= 1.31.5, optional `domus[postgres]` extra (decision 24) | BSD-3 (**avoid psycopg2/3: LGPL**) |
+| SQLite driver | standard library `sqlite3`, used synchronously | PSF |
 | Recurrence | python-dateutil (rrule) | Apache-2.0 / BSD dual |
 | iCal feed | icalendar | BSD-2 |
-| Scheduler | APScheduler 3.x | MIT |
-| HTTP / WebSocket to HA | httpx, websockets | BSD-3 |
+| Scheduler | APScheduler 3.x (not added yet; needs a maintainer's OK) | MIT |
+| WebSocket to HA | websockets (decision 21). httpx is not used: it pulls in certifi (MPL-2.0) | BSD-3 |
 | Password hashing | argon2-cffi | MIT |
-| Encryption | cryptography | Apache-2.0 / BSD |
+| Encryption | cryptography (not added yet) | Apache-2.0 / BSD |
 | Images | Pillow | MIT-CMU / HPND (the Python Imaging Library license, ASF Category A) |
-| QR labels | segno | BSD-3 |
-| Fuzzy match on import | rapidfuzz | MIT |
+| QR labels | segno (v0.2, not added yet) | BSD-3 |
+| Fuzzy match on import | standard library `difflib` in v0.1; rapidfuzz (MIT) only if it proves too slow | PSF |
 | CLI | Typer | MIT |
 | Tests / lint / types | pytest, ruff, pyright (not mypy: it depends on pathspec, MPL-2.0) | MIT |
 | Search | SQLite FTS5 / Postgres full-text (built in) | Public domain / PostgreSQL |
+| Docs site | Zensical (decision 26) | MIT |
 
-A CI step (`pip-licenses` MIT, and `license-checker` for the JS side) fails the build on any dependency that is not ASF Category A in the core install or the Docker image, including transitive ones. Optional extras such as `domus[heic]` (libheif, LGPL) live in a separate dependency group that is excluded from the core image and checked separately. They are off unless the user installs and enables them.
+A CI step (`pip-licenses` MIT with `scripts/check_licenses.py`, and `src/frontend/scripts/check-licenses.mjs` for the JS side, which needs no extra package) fails the build on any dependency that is not ASF Category A in the core install or the Docker image, including transitive ones. Optional extras such as `domus[heic]` (libheif, LGPL) live in a separate dependency group that is excluded from the core image and checked separately. They are off unless the user installs and enables them.
 
 ## 6. Database and storage
 
 Full design: [data-storage-backup.md](data-storage-backup.md). It confirms the stack in section 4 and adds the following.
 
-- **SQLite 3 in WAL mode is the official database.** PostgreSQL 15+ is supported behind the same SQLAlchemy models but is marked experimental in v1. Drivers are aiosqlite and asyncpg.
+- **SQLite 3 in WAL mode is the official database.** PostgreSQL 15+ is supported behind the same SQLAlchemy models but is marked experimental in v1. SQLAlchemy is used synchronously, with the standard library `sqlite3` driver and `pg8000` for Postgres (decision 24).
 - **UUIDv7 for every row**, stored as text so exports stay readable.
 - **`asset_identifier` table**: MAC addresses, serials, HA device/entity ids, and any other ids live here, one row each. This is what drives HA import dedupe and lookup by any id.
 - **`asset_relation` graph**: `powered_by`, `networked_via`, `shutoff_for`, and so on. Circuits, breakers, pipes, and valves (v0.3) become ordinary assets with relations, so they need no schema redesign.
@@ -254,21 +256,21 @@ Shared across all options:
 domus/
   pyproject.toml, uv.lock   one Python project at the repo root (PyPA src layout)
   src/
-    domus/          Python package: api/, services/, models/, ha/, backup/, cli/,
-                    migrations/ (Alembic), static/ (built front end, git-ignored)
+    domus/          Python package: api/, services/, models/, homeassistant/, backup/,
+                    cli.py, migrations/ (Alembic), static/ (built front end, git-ignored)
     frontend/       React + Mantine SPA (Vite, TypeScript strict); its build
                     output is copied into src/domus/static/ for the wheel and image
   tests/            pytest tests for src/domus (outside src/, per PyPA)
-  docs/      (MkDocs Material, MIT; docs/_prompts/ holds the human + AI design history)
+  docs/      (Zensical site from mkdocs.yml, MIT; docs/_prompts/ holds the human + AI design history)
   deploy/    Dockerfile, compose.yaml, Caddyfile example
   examples/  sample datasets (examples/sample-home/)
-  .github/   CI: lint, typecheck, test, license check, build image
-  LICENSE (Apache-2.0), NOTICE, CONTRIBUTING.md, SECURITY.md
+  .github/   CI: lint, typecheck, test, license check (an image build job is not added yet)
+  LICENSE (Apache-2.0), NOTICE, CONTRIBUTING.md (SECURITY.md is not written yet)
 ```
 
 - All source code lives under `src/` (AGENTS.md, PyPA src layout): the importable Python package is `src/domus/`, and the front end source is `src/frontend/`. Alembic migrations live inside the package so they ship in the wheel.
 - Python 3.14+ everywhere, managed with uv (`requires-python = ">=3.14"`, ruff `target-version = "py314"`), PEP 8. Pre-commit with ruff (lint+format), pyright strict on backend, ESLint + Prettier + TypeScript strict on front end.
-- Tests: pytest with a fake HA WebSocket server fixture; Playwright (Apache-2.0) end-to-end for the five core workflows. Tests never use the network; every fetch is stubbed or mocked.
+- Tests: pytest with a fake HA WebSocket server fixture (`tests/fake_ha.py`) and Vitest for the front end. Playwright (Apache-2.0) end-to-end tests for the five core workflows are planned but not added yet. Tests never use the network; every fetch is stubbed or mocked.
 - Conventional commits, semantic versioning, release images to GHCR.
 - Follow [AGENTS.md](../../../AGENTS.md) for all agent work: branch and PR only (never push to `main`), small diffs, a `Generated-by:` commit trailer for AI-assisted commits, and GitHub Actions pinned to full commit SHAs. Adding a dependency, tool, language, or GitHub Actions workflow, changing the published API, or making a backup-incompatible change needs a maintainer's OK first, so each step below that does one of these starts by asking.
 - DCO or simple CLA-free Apache-2.0 contributions.
@@ -281,8 +283,8 @@ domus/
 | Import HA devices | v0.1 | HA connect, registry fetch, match preview, idempotent import |
 | Troubleshoot a device | v0.1 docs/history, v0.2 live HA state | Asset detail page: docs, HA context, network, power, service history |
 | Perform maintenance | v0.1 mark done + cost, v0.2 parts/procedures | Task detail, completion form, next-due calculation |
-| Find equipment physically | v0.1 room/tag filter + floor plan, v0.2 search, v0.3 circuit | Filters, floor plan pins, search |
-| Recover or transfer records | v0.1 | Backup/restore UI + CLI, JSON export |
+| Find equipment physically | v0.1 area/tag filter + floor plan + search, v0.3 circuit | Filters, floor plan pins, search |
+| Recover or transfer records | v0.1 | Backup UI (make and download) + CLI (backup, verify, restore), JSON export |
 
 ## 10. First implementation steps (prioritized)
 
@@ -296,16 +298,16 @@ domus/
 8. **Front end shell** (React + Mantine + TanStack Router/Query, Vite): app layout, login, inventory list/detail, asset form, due-maintenance dashboard.
 9. **Floor plan + wall photo pins**: upload plan image per floor, place/drag asset pins, hotspot pins on wall photos.
 10. **HA import**: connect screen, registry fetch, matcher, preview, idempotent apply; fake-HA test fixture.
-11. **Example dataset import**: make `examples/sample-home/` importable with `domus restore examples/sample-home --merge` (and a "Load sample data" button on an empty install), plus a test that imports it into a fresh database and checks row counts. The dataset is already in the repo: one property, one house, a few rooms, and a handful of different devices with maintenance tasks.
+11. **Example dataset import**: make `examples/sample-home/` importable with `domus restore examples/sample-home --merge` (and an Admin-only "Load sample data" button that adds it as a second property, decision 27), plus a test that imports it into a fresh database and checks row counts. The dataset is already in the repo: one property, one house, a few rooms, and a handful of different devices with maintenance tasks.
 12. **Docs: "How To Install Locally" guide** (`docs/install-local.md`): prerequisites; install with uv and with Docker; first run and admin setup; loading the sample data; connecting Home Assistant (optional); where data and backups live; **making a backup, restoring it, and verifying it**; and an "upgrade test" checklist so maintainers can back up on one version, upgrade or downgrade, restore, and compare as we build. Kept up to date with each release.
-13. **v0.1 release**: Docker image, Compose example, docs site.
+13. **v0.1 release**: Docker image, Compose example, docs site. Publishing the image, a CI docs job, docs hosting, and the release tag each need a maintainer's OK.
 14. **Future, after v0.3: basic Apple HomeKit integration** (see section 3).
 
 Steps 2 to 7 can start immediately. Step 8 uses React + Mantine and follows the 9-step front end list in [frontend-options.md](frontend-options.md).
 
 ## 11. Open questions for Shane
 
-- Critical items and access rules: does the design in section 2 fit what you want? It is written out using your master bedroom examples.
+None open. The critical-item and access-rule design in section 2 was built as written in v0.1 (decision 11).
 
 1. ~~Backend language?~~ Answered: Python/FastAPI.
 2. ~~Multiple properties?~~ Answered: yes, in the schema.
@@ -317,3 +319,35 @@ Steps 2 to 7 can start immediately. Step 8 uses React + Mantine and follows the 
 8. ~~Backup encryption?~~ Answered: optional.
 9. ~~HEIC?~~ Answered: optional extra only. LGPL is never allowed in core.
 10. ~~Guest limits?~~ Answered: guests are limited in what they see and control, implemented with access rules (section 2).
+
+## 12. v0.1 status (2026-11-07)
+
+Everything below is merged on `main`. No release is tagged.
+
+**Built** (step numbers from section 10)
+
+| Step | What shipped | PR |
+| :-- | :-- | :-- |
+| 1 | Repo bootstrap: uv project, pre-commit, CI (ruff, pyright, pytest, Python and npm license checks); a manual dependency security audit script (`scripts/security_audit.py`, not in CI) | #2, #5, #7 |
+| 2 to 4 | FastAPI app, settings, sync SQLAlchemy + Alembic, SQLite WAL, health and OpenAPI at `/api/v1/docs`; the full data model; first-run setup, session cookie with CSRF, login rate limit, roles, critical items, access rules (`AccessPolicy`), personal access tokens, guest-safe responses; read and write endpoints | #4 |
+| 5 | Local blob store, uploads with type sniffing and size limits, images re-encoded with Pillow to strip EXIF and GPS, external links; Residents and above only (decision 29) | #8 |
+| 6 | `compute_next_due` for RRULE and floating tasks, due list, mark done with cost, event log, iCal feed at `/calendar.ics` (token with the `calendar` scope) | #4, #12 |
+| 7 | JSONL export, `.hiotbak` backup, verify, restore with `--merge` and `--dry-run`, safety copy before restore; search index (SQLite FTS5, Postgres `tsvector` + `pg_trgm`), with the suite passing on Postgres 16 | #4, #11 |
+| 8 | Front end (React + Mantine, generated API types, served by `domus serve`): login, setup, overview with due maintenance, Areas, Devices list and detail, device add and edit, mark done, search, Admin backup screen (make, list, download) | #3, #6, #11, #12 |
+| 9 | Floor plan and wall photo pin editor (react-konva, normalized coordinates) | #8 |
+| 10 | Home Assistant import: connect with a token used once and never stored, preview, floor-to-building mapping, idempotent apply, fake HA server for tests | #10 |
+| 11 | `domus restore examples/sample-home --merge` and the **Load sample data** button | #4, #9 |
+| 12 | [Install guide](../../install-local.md) with backup, restore, and the upgrade test checklist | #9 |
+| 13 (part) | Dockerfile, Compose example, Caddy example, Zensical docs site config | #9 |
+
+**v0.1 scope not built yet**
+
+1. Scheduled backups with 7/4/12 retention, the weekly automatic verify, and the "last backup N days ago" warning. Needs a scheduler (APScheduler, MIT), which needs a maintainer's OK.
+2. Restore from the web UI: deferred on purpose (decision 30).
+3. Screens for attaching photos and manuals to a device, and for managing members, access rules, critical flags on Areas, personal access tokens, and the calendar feed URL. The API supports all of them; the UI does not yet.
+4. Thumbnails for photos and PDFs.
+5. The maintenance calendar view (FullCalendar) and the installable PWA.
+6. Playwright end-to-end tests.
+7. Release work (step 13): set the package version, publish the Docker image, a CI docs job and docs hosting, and the tag. Each needs a maintainer's OK.
+
+**Designed for later and not in v0.1:** optional backup encryption (`age`), the S3-compatible blob store and off-site upload, unreferenced-blob cleanup, partial export with closure, house handover export, CSV export, HEIC as an opt-in extension, Postgres in CI, and live Home Assistant context and control (v0.2). See data-storage-backup.md section 8.

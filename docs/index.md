@@ -5,7 +5,7 @@ devices, where they are, how to maintain them, and how they connect to Home Assi
 It runs on your own computer or home server, works offline, and keeps your data in one
 folder that you can back up and restore.
 
-Domus is in early development (v0.1).
+Domus is in early development. The v0.1 features are built; no release is tagged yet.
 
 - **[Install locally](install-local.md)**: run Domus with uv or Docker, load the sample
   home, and back up and restore your data.

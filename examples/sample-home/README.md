@@ -6,10 +6,10 @@ A small, fictional example property for demos, tests, and trying out Domus. All 
 
 - **Property**: "Sample Home", with one building, **House**.
 - **Floors**: Main Floor and Basement.
-- **Rooms**: Kitchen, Living Room, Primary Bedroom, and Utility Room.
+- **Areas**: Kitchen, Living Room, Primary Bedroom, and Utility Room.
 - **Devices** (9):
 
-  | Device | Room | Shows off |
+  | Device | Area | Shows off |
   | :-- | :-- | :-- |
   | Refrigerator | Kitchen | A manual link, a serial, a warranty, and a filter task every 6 months counted from the last change |
   | Kitchen Smoke Detector | Kitchen | A yearly fixed-date task (November 1), already overdue in the demo |

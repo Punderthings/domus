@@ -31,7 +31,7 @@ say in the PR which way you read it.
   don't reopen them without a new reason.
 - **Stop and ask a maintainer first** before you:
   - add a dependency, a new tool or language, or a GitHub Actions workflow;
-  - change licensing, the published API shape (`api/`, `openapi/`), or URLs that
+  - change licensing, the published API shape (`src/domus/api/`, `src/frontend/openapi.json`), or URLs that
     others may cite;
   - Make incompatible data structure changes for backup/restore, so that
     maintainers can decide it a new software version is needed.
@@ -49,6 +49,8 @@ say in the PR which way you read it.
 | `scripts/` | Developer and CI helpers, such as `check_licenses.py` |
 | `docs/` | Documentation; `docs/_prompts/` holds the design history and plans |
 | `examples/` | Sample datasets, such as `examples/sample-home/` |
+| `deploy/` | Dockerfile, Compose example, Caddy example |
+| `mkdocs.yml` | Docs site config, built with Zensical |
 | `.github/workflows/` | CI: lint, type check, tests, license check |
 
 Run the same checks CI runs with `uv run ruff check .`, `uv run ruff format --check .`,

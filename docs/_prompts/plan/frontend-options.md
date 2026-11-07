@@ -1,6 +1,6 @@
 # Front end architecture options
 
-*Home IoT Maintenance App · prepared 2026-11-06 · status: **decided 2026-11-06: Option A, React + Mantine** (Shane, citing the wide contributor pools)*
+*Home IoT Maintenance App · prepared 2026-11-06 · status: **decided 2026-11-06: Option A, React + Mantine** (Shane, citing the wide contributor pools). v0.1 status is at the end.*
 
 ## What the front end has to do
 
@@ -127,5 +127,19 @@ Pick **B** if you value a lean, fast UI and are happy to assemble more widgets. 
 7. Build the wall photo hotspots, reusing the same pin component.
 8. Build the HA import preview (backend does discovery; UI shows match, merge, and select).
 9. Configure the PWA and test it on a phone over the LAN.
+
+## Status of these steps in v0.1 (2026-11-07)
+
+Built and merged (PRs #3, #6, #8, #10, #11, #12):
+
+- Step 1, except Playwright: Vite 8 app in `src/frontend/` with ESLint, Prettier, Vitest, and a lockfile license check (`scripts/check-licenses.mjs`, no extra package) in CI. lightningcss (MPL-2.0) is allowed as a build-only tool (decision 20).
+- Step 2: `openapi-typescript` with `openapi-fetch`; CI fails if `openapi.json` or `src/api/schema.d.ts` drifts.
+- Step 3, with one change: the system font stack instead of bundled fonts, because most open fonts use the OFL (ASF Category B).
+- Steps 4 and 5, without the calendar view: Devices list and detail, device add and edit, the due maintenance list, and **Mark done** with cost. The UI says "Area" and "Device" (decision 25).
+- Steps 6 and 7: floor plans and wall photos with draggable pins (react-konva, normalized coordinates).
+- Step 8: Home Assistant import preview and apply.
+- Also: search, the Admin backup screen, and **Load sample data** with a property switcher.
+
+Not built yet: Playwright tests, the maintenance calendar (FullCalendar), the PWA (step 9), attaching photos and manuals to a device from the UI (the API supports it; step 4's camera upload), and screens for members, access rules, personal access tokens, and the calendar feed URL. TanStack Table, `@mantine/dates`, `@mantine/dropzone`, and `dayjs` were not needed so far.
 
 *Versions and licenses were checked against the npm registry on 2026-11-06.*
