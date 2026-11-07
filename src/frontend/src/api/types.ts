@@ -19,6 +19,7 @@ export interface Page<T> {
 export type CurrentUser = Schemas['MeOut'];
 export type Membership = Schemas['MembershipOut'];
 export type SetupStatus = Schemas['SetupStatus'];
+export type SampleDataStatus = Schemas['SampleDataStatus'];
 export type LoginInput = Schemas['LoginIn'];
 export type SetupInput = Schemas['SetupIn'];
 export type Property = Schemas['PropertyOut'];
@@ -35,6 +36,12 @@ export type Asset = Schemas['AssetOut'] | Schemas['AssetGuestOut'];
 /** Guests get no identifiers and none of the fields left out of `Asset`. */
 export type AssetDetail = Schemas['AssetDetailOut'] | Schemas['AssetGuestDetailOut'];
 export type MaintenanceTask = Schemas['TaskOut'];
+export type Document = Schemas['DocumentOut'];
+/** An image devices can be pinned onto: a floor plan, wall photo, or panel photo. */
+export type Canvas = Schemas['CanvasOut'];
+export type CanvasKind = Schemas['CanvasIn']['kind'];
+/** One device pin on a canvas, at 0-1 coordinates of the image. */
+export type Placement = Schemas['PlacementOut'];
 
 /** Home Assistant import: what the server would do, and what it did. */
 export type HaPreview = Schemas['ImportPreview'];

@@ -1,0 +1,16 @@
+# Build context filter for deploy/Dockerfile (BuildKit reads <Dockerfile>.dockerignore).
+# Only what the image needs; never local data, secrets, or build output.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!NOTICE
+!src/domus/
+!src/frontend/
+!examples/
+src/domus/static/
+src/frontend/node_modules/
+**/__pycache__/
+**/*.pyc
+**/.env
